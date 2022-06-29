@@ -14,9 +14,9 @@
 
 blank_issues_enabled: false
 contact_links:
-  - name: Report a bug with the SDK.
+  - name: Report a bug with the model generator.
     url: https://github.com/eclipse-velocitas/vehicle-model-generator/issues
-    about: This is the issue tracker for the SDK.
+    about: This is the issue tracker for the model generator.
   - name: Report incorrect or missing information in our documentation.
     url: https://github.com/eclipse-velocitas/velocitas-docs/issues
     about: Our documentation has its own issue tracker. Please report issues with the website there.
