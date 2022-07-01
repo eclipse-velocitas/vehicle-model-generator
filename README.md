@@ -1,4 +1,6 @@
-# Velocitas vehicle model generator
+# Velocitas Vehicle Model Generator
+
+[![License: Apache](https://img.shields.io/badge/License-Apache-yellow.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 
 ## About
 This generator creates a vehicle model from the given vspec specification for the target programming language.
@@ -30,6 +32,7 @@ python3 gen_vehicle_model.py -I ./vehicle_signal_specification/spec ./vehicle_si
 `-s`, `--strict`                                    | Use strict checking: Terminate when anything not covered or not recommended by the core VSS specs is found.
 `-l {python}`, `--language {python}`                | The target language of the generated code.
 
-## Contributing
-
-For guidance on setting up a development environment and how to make a contribution to the Velocitas Vehicle Model Generator, see the [contributing guidelines](./CONTRIBUTING.md).
+## Contribution
+- [GitHub Issues](https://github.com/eclipse-velocitas/vehicle-model-generator/issues)
+- [Mailing List](https://accounts.eclipse.org/mailing-list/velocitas-dev)
+- [Contribution](./CONTRIBUTING.md)
