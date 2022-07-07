@@ -20,10 +20,9 @@ import argparse
 import os
 import sys
 
-from python_generator import VehicleModelPythonGenerator
-
 import vspec
 
+from python_generator import VehicleModelPythonGenerator
 
 if __name__ == "__main__":
     # The arguments we accept

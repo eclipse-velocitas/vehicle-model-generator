@@ -1,3 +1,4 @@
+#!/bin/bash
 # Copyright (c) 2022 Robert Bosch GmbH and Microsoft Corporation
 #
 # This program and the accompanying materials are made available under the
@@ -12,23 +13,20 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-sudo chmod +x .devcontainer/scripts/*.sh
-sudo chown -R $(whoami) $HOME
+echo "#######################################################"
+echo "### Installing OS updates                           ###"
+echo "#######################################################"
+sudo apt-get update
+sudo apt-get upgrade -y
+sudo apt-get install -y wget ca-certificates
 
 echo "#######################################################"
-echo "### Checking proxies                                ###"
+echo "### Installing python version 3                     ###"
 echo "#######################################################"
-sudo .devcontainer/scripts/configure-proxies.sh | tee -a $HOME/configure-proxies.log
+PYTHON_VERSION=3.9
+sudo apt-get install -y python3-distutils
+sudo apt-get install -y python$PYTHON_VERSION
+curl -fsSL https://bootstrap.pypa.io/get-pip.py | sudo python$PYTHON_VERSION
 
-echo "#######################################################"
-echo "### Executing container-set.sh                      ###"
-echo "#######################################################"
-sudo .devcontainer/scripts/container-set.sh 2>&1 | tee -a $HOME/container-set.log
-
-echo "#######################################################"
-echo "### Executing add-python.sh                         ###"
-echo "#######################################################"
-.devcontainer/scripts/add-python.sh 2>&1 | tee -a $HOME/add-python.log
-
-pip3 install -r ./requirements.txt
-pip3 install -r ./requirements-vss.txt
+sudo update-alternatives --install /usr/bin/python python /usr/bin/python$PYTHON_VERSION 10
+sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python$PYTHON_VERSION 10
