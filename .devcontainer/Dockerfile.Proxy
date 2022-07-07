@@ -30,6 +30,11 @@ ENV HTTPS_PROXY=$HTTP_PROXY
 ENV FTP_PROXY=$HTTP_PROXY
 ENV ALL_PROXY=$HTTP_PROXY
 ENV NO_PROXY="localhost,127.0.0.1,0.0.0.0,10.0.0.0/8,192.168.122.0/24,cattle-system.svc,.svc,.cluster.local"
+ENV http_proxy=$HTTP_PROXY
+ENV https_proxy=$HTTP_PROXY
+ENV ftp_proxy=$HTTP_PROXY
+ENV all_proxy=$HTTP_PROXY
+ENV no_proxy=$NO_PROXY
 
 # Install needed packages and setup non-root user. Use a separate RUN statement to add your
 # own dependencies. A user of "automatic" attempts to reuse an user ID if one already exists.
