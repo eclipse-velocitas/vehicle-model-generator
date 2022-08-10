@@ -14,10 +14,13 @@
 
 """VehicleModelPythonGenerator."""
 
+from multiprocessing.dummy import Array
 import os
 import re
 import shutil
 from typing import Set
+from tomlkit import array
+from typing import List
 
 from vspec.model.vsstree import VSSNode
 
@@ -97,6 +100,7 @@ class VehicleModelPythonGenerator:
         self.ctx = CodeGeneratorContext()
         self.imports: Set[str] = set()
         self.model_imports: Set[str] = set()
+        self.collections: List[List] = list()
 
     def generate(self):
         """Generate python code for vehicle model."""
@@ -178,6 +182,15 @@ class VehicleModelPythonGenerator:
         self.imports.clear()
         self.model_imports.clear()
 
+    def __write_collections(self):
+        self.ctx.write("\n\n")
+
+        for collection in self.collections:
+            for lines in collection:
+                self.ctx.write(f"{lines}\n")
+
+        self.collections.clear()
+
     def __gen_model_docstring(self, node: VSSNode):
         self.ctx.write(f'"""{node.name} model.')
         if node.children:
@@ -185,7 +198,7 @@ class VehicleModelPythonGenerator:
             self.ctx.write("----------\n")
             for i in node.children:
                 if i.type.value == "attribute":
-                    self.ctx.write(f"{i.name}: {i.type.value} ({i.data_type.value})\n")
+                    self.ctx.write(f"{i.name}: {i.type.value} ({i.datatype.value})\n")
                 else:
                     self.ctx.write(f"{i.name}: {i.type.value}\n")
 
@@ -229,27 +242,27 @@ class VehicleModelPythonGenerator:
         for child in node.children:
             if child.type.value in ("attribute", "sensor", "actuator"):
                 self.ctx.write(
-                    f"self.{child.name} = DataPoint{self.__get_data_type(child.data_type.value)}"
+                    f"self.{child.name} = DataPoint{self.__get_datatype(child.datatype.value)}"
                     f'("{child.name}", self)\n'
                 )
                 self.model_imports.add(
-                    f"DataPoint{self.__get_data_type(child.data_type.value)}"
+                    f"DataPoint{self.__get_datatype(child.datatype.value)}"
                 )
             if child.type.value == "branch":
                 if child.instances:
-                    instances = self.__gen_instances(child)
-                    inst_repr = ", ".join(instances)
+                    self.collections.append(self.__gen_collection(child))
                     self.ctx.write(
-                        f"self.{child.name} = ModelCollection[{child.name}]"
-                        f"([{inst_repr}], {child.name}(self))\n"
+                        f"self.{child.name} = {child.name}Collection(self)\n"
                     )
-                    self.model_imports.add("ModelCollection")
+                    
                 else:
                     self.ctx.write(f"self.{child.name} = {child.name}(self)\n")
                 self.imports.add(f"{path}/{child.name}")
 
         self.ctx.dedent()
         self.ctx.dedent()
+
+        self.__write_collections()
 
         if is_root:
             self.ctx.write("\n\nvehicle = Vehicle()\n")
@@ -263,28 +276,54 @@ class VehicleModelPythonGenerator:
 
         self.ctx.reset()
 
-    def __gen_instances(self, node: VSSNode):
+    def __gen_collection(self, node: VSSNode):
         instances = node.instances
-
         reg_ex = r"\w+\[\d+,(\d+)\]"
-
-        result = []
+        result: List[str] = list()
+        result.append(f"class {node.name}Collection:")
+        result.append("    def __init__(self, parent):")
 
         complex_list = False
         for i in instances:
+            print(f"for i in instances {i}")
             if isinstance(i, list) or re.match(reg_ex, i):
                 complex_list = True
 
         if complex_list:
+            if len(instances) == 2:
+                outerInstances = self.__parse_instances(reg_ex, instances[0], node.name)
+                instanceCollection = self.__get_instance_type(outerInstances[0], node.name)
+                for i in outerInstances:
+                    innerInstances = self.__parse_instances(reg_ex, instances[1], node.name)
+                    result.append(f"        self.{i} = {instanceCollection}Collection")
+                    # result.append(f"        self.{x} = {instance_type}(parent)")
+
             for i in instances:
-                result.append(self.__parse_instances(reg_ex, i))
+                for item in self.__parse_instances(reg_ex, i, node.name):
+                    print(f"complex node:{node.name}, instance:{i}, item:{item}")
+                    result.append(item)
+                        
         else:
-            result.append(self.__parse_instances(reg_ex, instances))
+            for line in self.__parse_instances(reg_ex, instances, node.name):
+                print(f"non complex {node.name}")
+                result.append(line)
+
+        result.append("\n")
+        return result
+
+    def __get_instance_type(self, instance, node):
+        reg_ex = r"\w+\[\d+,(\d+)\]"
+        result = node
+        print(f"Here {instance}")
+        if (re.match(reg_ex, instance)):
+            result = node + re.sub(reg_ex, "", instance)
+            print("here")
 
         return result
 
-    def __parse_instances(self, reg_ex, i):
-
+    def __parse_instances(self, reg_ex, i, instance_type):
+        result: List[str] = list()
+        
         # parse string instantiation elements (e.g. Row[1,5])
         if isinstance(i, str):
             if re.match(reg_ex, i):
@@ -292,20 +331,22 @@ class VehicleModelPythonGenerator:
                 range_name = inst_range_arr[0]
                 lower_bound = int(inst_range_arr[1])
                 upper_bound = int(inst_range_arr[2])
-                self.model_imports.add("NamedRange")
-                return f'NamedRange("{range_name}", {lower_bound}, {upper_bound})'
+                for x in range(lower_bound, upper_bound):
+                    result.append(f"{range_name}{x}")
 
-            raise ValueError("", "", "instantiation type not supported")
+                return result
+
+            raise ValueError("", "", f"instantiation type {i} not supported")
 
         # Use list elements for instances (e.g. ["LEFT","RIGHT"])
         if isinstance(i, list):
-            items = '", "'.join(i)
-            self.model_imports.add("Dictionary")
-            return f'Dictionary(["{items}"])'
+            for x in i:
+                result.append(f"{x}")
+            return result
 
         raise ValueError("", "", f"is of type {type(i)} which is unsupported")
 
-    def __get_data_type(self, data_type):
-        if data_type[-1] == "]":
-            return data_type[0].upper() + data_type[1:-2] + "Array"
-        return data_type[0].upper() + data_type[1:]
+    def __get_datatype(self, datatype):
+        if datatype[-1] == "]":
+            return datatype[0].upper() + datatype[1:-2] + "Array"
+        return datatype[0].upper() + datatype[1:]
