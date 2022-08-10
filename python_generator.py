@@ -276,48 +276,80 @@ class VehicleModelPythonGenerator:
 
         self.ctx.reset()
 
+    def __gen_inner_collection(self, collection_name, instances, instance_type):
+        result: List[str] = list()
+        print(f"Creating inner collection {collection_name}")
+        result.append(f"class {collection_name}:")
+        result.append("    def __init__(self, parent):")
+                    
+        for i in instances:
+            result.append(f"        self.{i} = {instance_type}(self)")
+
+        return result
+
     def __gen_collection(self, node: VSSNode):
         instances = node.instances
         reg_ex = r"\w+\[\d+,(\d+)\]"
         result: List[str] = list()
+        print(f"Creating class {node.name}Collection")
         result.append(f"class {node.name}Collection:")
         result.append("    def __init__(self, parent):")
 
         complex_list = False
         for i in instances:
-            print(f"for i in instances {i}")
             if isinstance(i, list) or re.match(reg_ex, i):
                 complex_list = True
 
         if complex_list:
-            if len(instances) == 2:
-                outerInstances = self.__parse_instances(reg_ex, instances[0], node.name)
-                instanceCollection = self.__get_instance_type(outerInstances[0], node.name)
-                for i in outerInstances:
-                    innerInstances = self.__parse_instances(reg_ex, instances[1], node.name)
-                    result.append(f"        self.{i} = {instanceCollection}Collection")
-                    # result.append(f"        self.{x} = {instance_type}(parent)")
+            outerInstances = self.__parse_outer_instances(reg_ex, instances, node.name)
+            instanceCollectionType = self.__get_instance_type(outerInstances[0], node.name)
+            print(f"instanceCollectionType: {instanceCollectionType}")
 
-            for i in instances:
-                for item in self.__parse_instances(reg_ex, i, node.name):
-                    print(f"complex node:{node.name}, instance:{i}, item:{item}")
-                    result.append(item)
+            for i in outerInstances:
+                print(f"outerInstances: {i}")
+                result.append(f"        self.{i} = {instanceCollectionType}Collection(self)")
+
+            if len(instances) > 1:
+                innerInstances = self.__parse_inner_instances(reg_ex, instances, node.name)
+                self.collections.append(
+                    self.__gen_inner_collection(
+                        f"{instanceCollectionType}Collection", innerInstances, node.name
+                    )
+                )
+
+            # for i in instances:
+            #     for item in self.__parse_instances(reg_ex, i, node.name):
+            #         print(f"complex node:{node.name}, instance:{i}, item:{item}")
+            #         result.append(item)
                         
         else:
             for line in self.__parse_instances(reg_ex, instances, node.name):
-                print(f"non complex {node.name}")
-                result.append(line)
+                print(f"non complex {node.name}.{line}")
+                result.append(f"        self.{line} = {node.name}(self)")
 
         result.append("\n")
         return result
 
     def __get_instance_type(self, instance, node):
-        reg_ex = r"\w+\[\d+,(\d+)\]"
+        reg_ex = r"(.+)(\d+)"
         result = node
-        print(f"Here {instance}")
         if (re.match(reg_ex, instance)):
-            result = node + re.sub(reg_ex, "", instance)
-            print("here")
+            result = node + re.sub(reg_ex, "\\1", instance)
+
+        return result
+
+    def __parse_outer_instances(self, reg_ex, i, instance_type):
+        result: List[str] = list()
+        print(f"__parse_outer_instances: {i[0]}")
+        result = self.__parse_instances(reg_ex, i[0], instance_type)
+        for x in result:
+            print(f"__parse_outer_instances: {x}")
+        return result
+
+    def __parse_inner_instances(self, reg_ex, i, instance_type):
+        result: List[str] = list()
+
+        result = self.__parse_instances(reg_ex, i[1], instance_type)
 
         return result
 
@@ -331,7 +363,7 @@ class VehicleModelPythonGenerator:
                 range_name = inst_range_arr[0]
                 lower_bound = int(inst_range_arr[1])
                 upper_bound = int(inst_range_arr[2])
-                for x in range(lower_bound, upper_bound):
+                for x in range(lower_bound, upper_bound + 1):
                     result.append(f"{range_name}{x}")
 
                 return result
