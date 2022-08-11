@@ -20,9 +20,11 @@ import argparse
 import os
 import sys
 
+from python_generator import VehicleModelPythonGenerator
+from cpp_generator import VehicleModelCppGenerator
+
 import vspec
 
-from python_generator import VehicleModelPythonGenerator
 
 if __name__ == "__main__":
     # The arguments we accept
@@ -30,6 +32,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Convert vspec to Velocitas Vehicle Model code."
     )
+    # Add para to name package
     parser.add_argument(
         "-N",
         "--package-name",
@@ -51,7 +54,8 @@ if __name__ == "__main__":
         "--target-folder",
         type=str,
         default="./vehicle_model",
-        help="The folder name (with relative path) where the code will be generated.",
+        help="The folder name (with relative path) where the code will be generated. \
+            Python package will be created with the same name.",
     )
     parser.add_argument(
         "-s",
@@ -64,7 +68,7 @@ if __name__ == "__main__":
         "-l",
         "--language",
         help="The target language of the generated code.",
-        choices=["python"],
+        choices=["python", "cpp"],
         default="python",
     )
     parser.add_argument(
@@ -95,11 +99,11 @@ if __name__ == "__main__":
 
         if args.language == "python":
             print("Recursing tree and creating Python code...")
-            VehicleModelPythonGenerator(
-                tree,
-                args.target_folder,
-                args.package_name,
-            ).generate()
+            VehicleModelPythonGenerator(tree, args.target_folder, args.package_name,).generate()
+            print("All done.")
+        elif args.language == "cpp":
+            print("Recursing tree and creating c++ code...")
+            VehicleModelCppGenerator(tree, args.target_folder).generate()
             print("All done.")
         else:
             print(f"Language {args.language} is not supported yet.")
