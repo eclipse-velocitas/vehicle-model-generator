@@ -4,7 +4,7 @@
 | Dependency | Version | License |
 |:-----------|:-------:|--------:|
 |anytree|2.8.0|Apache 2.0|
-|attrs|21.4.0|MIT|
+|attrs|22.1.0|MIT|
 |deprecation|2.1.0|Apache 2.0|
 |iniconfig|1.1.1|MIT|
 |isodate|0.6.1|BSD|
@@ -14,7 +14,7 @@
 |pyparsing|3.0.9|MIT|
 |pytest|7.1.2|MIT|
 |PyYAML|6.0|MIT|
-|rdflib|6.1.1|New BSD|
+|rdflib|6.2.0|New BSD|
 |setuptools|58.1.0|MIT|
 |six|1.16.0|MIT|
 |stringcase|1.2.0|MIT|
