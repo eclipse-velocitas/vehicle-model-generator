@@ -34,11 +34,15 @@ jobs:
       - name: DUMP Info
         run: |
           echo "Ref = ${{ github.ref }}"
+          echo "Ref Protected = ${{ github.ref_protected }}"
           echo "Head Ref = ${{ github.head_ref }}"
           echo "Base Ref = ${{ github.base_ref }}"
           echo "Ref Name = ${{ github.ref_name }}"
           echo "Repo = ${{ github.event.pull_request.head.repo.full_name }}"
-          echo "Repo = ${{ github.action_repository }}"
+          echo "Action = ${{ github.action}}"
+          echo "Event = ${{ github.event }}"
+          echo "Event name = ${{ github.event_name }}"
+          echo "Action Repo = ${{ github.action_repository }}"
 
       - name: Checkout repository
         uses: actions/checkout@v2
