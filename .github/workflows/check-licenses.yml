@@ -21,7 +21,7 @@ on:
     # Run only on branches/commits and not tags
     branches:
       - main
-  pull_request:
+  pull_request_target:
     branches:
       - main
 
