@@ -38,12 +38,13 @@ jobs:
           echo "Base Ref = ${{ github.base_ref }}"
           echo "Ref Name = ${{ github.ref_name }}"
           echo "Repo = ${{ github.event.pull_request.head.repo.full_name }}"
+          echo "Repo = ${{ github.action_repository }}"
 
       - name: Checkout repository
         uses: actions/checkout@v2
         with:
           ref: ${{ github.head_ref }}
-          repository: ${{github.event.pull_request_target.head.repo.full_name}}
+          repository: ${{github.event.pull_request.head.repo.full_name}}
 
       - name: Clone License Check Repo
         uses: actions/checkout@v2
