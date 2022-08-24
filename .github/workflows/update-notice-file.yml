@@ -24,7 +24,7 @@ jobs:
     # Check and generate a new Noticefile only if the PR state is merged
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
-    name: Check Software Licenses and Notice file
+    name: Check and update Licenses Notice file
 
     steps:
       - name: Checkout repository
