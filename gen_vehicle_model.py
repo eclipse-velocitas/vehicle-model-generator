@@ -88,7 +88,7 @@ if __name__ == "__main__":
             args.vspec_file,
             include_dirs,
             merge_private=False,
-            break_on_noncore_attribute=strict,
+            break_on_unknown_attribute=True,
             break_on_name_style_violation=strict,
             expand_inst=False,
         )

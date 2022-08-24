@@ -185,7 +185,7 @@ class VehicleModelPythonGenerator:
             self.ctx.write("----------\n")
             for i in node.children:
                 if i.type.value == "attribute":
-                    self.ctx.write(f"{i.name}: {i.type.value} ({i.data_type.value})\n")
+                    self.ctx.write(f"{i.name}: {i.type.value} ({i.datatype.value})\n")
                 else:
                     self.ctx.write(f"{i.name}: {i.type.value}\n")
 
@@ -229,11 +229,11 @@ class VehicleModelPythonGenerator:
         for child in node.children:
             if child.type.value in ("attribute", "sensor", "actuator"):
                 self.ctx.write(
-                    f"self.{child.name} = DataPoint{self.__get_data_type(child.data_type.value)}"
+                    f"self.{child.name} = DataPoint{self.__get_datatype(child.datatype.value)}"
                     f'("{child.name}", self)\n'
                 )
                 self.model_imports.add(
-                    f"DataPoint{self.__get_data_type(child.data_type.value)}"
+                    f"DataPoint{self.__get_datatype(child.datatype.value)}"
                 )
             if child.type.value == "branch":
                 if child.instances:
@@ -305,7 +305,7 @@ class VehicleModelPythonGenerator:
 
         raise ValueError("", "", f"is of type {type(i)} which is unsupported")
 
-    def __get_data_type(self, data_type):
-        if data_type[-1] == "]":
-            return data_type[0].upper() + data_type[1:-2] + "Array"
-        return data_type[0].upper() + data_type[1:]
+    def __get_datatype(self, datatype):
+        if datatype[-1] == "]":
+            return datatype[0].upper() + datatype[1:-2] + "Array"
+        return datatype[0].upper() + datatype[1:]
