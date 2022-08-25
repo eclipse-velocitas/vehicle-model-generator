@@ -35,10 +35,10 @@ if __name__ == "__main__":
     # Add para to name package
     parser.add_argument(
         "-N",
-        "--package-name",
+        "--name",
         type=str,
-        default="vehicle-model",
-        help="Name of the module/package.",
+        help="When generating a python model this is used as name of the module/package.\
+             For C++ it is used as root namespace",
     )
     parser.add_argument(
         "-I",
@@ -99,11 +99,11 @@ if __name__ == "__main__":
 
         if args.language == "python":
             print("Recursing tree and creating Python code...")
-            VehicleModelPythonGenerator(tree, args.target_folder, args.package_name,).generate()
+            VehicleModelPythonGenerator(tree, args.target_folder, args.name,).generate()
             print("All done.")
         elif args.language == "cpp":
             print("Recursing tree and creating c++ code...")
-            VehicleModelCppGenerator(tree, args.target_folder).generate()
+            VehicleModelCppGenerator(tree, args.target_folder, args.name,).generate()
             print("All done.")
         else:
             print(f"Language {args.language} is not supported yet.")

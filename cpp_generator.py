@@ -26,7 +26,7 @@ from utils import CodeGeneratorContext
 class VehicleModelCppGenerator:
     """Generate c++ code for vehicle model."""
 
-    def __init__(self, root: VSSNode, target_folder: str):
+    def __init__(self, root: VSSNode, target_folder: str, namespace: str):
         """Initialize the c++ generator.
 
         Args:
@@ -34,15 +34,14 @@ class VehicleModelCppGenerator:
         """
         self.root = root
         self.target_folder = target_folder
-        self.package_name = os.path.basename(target_folder)
         self.ctx_header = CodeGeneratorContext()
-        self.ctx_source = CodeGeneratorContext()
         self.includes: Set[str] = set()
         self.external_includes: Set[str] = set()
+        self.root_namespace = namespace
 
     def generate(self):
         """Generate c++ code for vehicle model."""
-        path = self.target_folder
+        path = os.path.join(self.target_folder, "include")
 
         if os.path.exists(path):
             shutil.rmtree(path)
@@ -85,13 +84,9 @@ class VehicleModelCppGenerator:
             strip_lines=True,
         )
 
-        self.ctx_source.write(f"#include \"{node.name}.hpp\"\n\n")
-        self.ctx_source.write(self.__generate_opening_namespace_text("velocitas", node))
-
     def __gen_footer(self, node: VSSNode):
-        self.ctx_header.write(self.__generate_closing_namespace_text("velocitas", node))
+        self.ctx_header.write(self.__generate_closing_namespace_text(self.root_namespace, node))
         self.ctx_header.write(f"#endif // {self.__generate_guard_name(node)}\n")
-        self.ctx_source.write(self.__generate_closing_namespace_text("velocitas", node))
 
     def __gen_imports(self, node: VSSNode):
         self.ctx_header.write(f"#include \"sdk/DataPoint.h\"\n")
@@ -140,10 +135,97 @@ class VehicleModelCppGenerator:
             self.ctx_header.write(f"* Allowed values: {allowed_values}\n")
         self.ctx_header.write("**/\n")
 
+    def __gen_nested_class(self, child: VSSNode, instances: list[tuple[str, str]], index: int) -> str:
+
+        child_namespace = "::".join(self.__get_namespace_for_node(child))
+        name, values = instances[index]
+        nested_name = instances[index + 1][0] if index + 1 < len(instances) else child.name
+        nested_values = instances[index + 1][1] if index + 1 < len(instances) else [child.name]
+        nested_type = instances[index + 1][0] if index + 1 < len(instances) - 1 else f"{child_namespace}::{child.name}"
+
+        if nested_type == "NamedRange":
+            nested_type = instances[index + 1][1][0] + "Type"
+        
+        ctor_params = ""
+        ctor_initializer_list = []
+        method_list = []
+        member_list = []
+        class_name = ""
+
+        if name.endswith("Collection"):
+            ctor_params = "ParentClass* parent"
+            ctor_initializer_list.append(f"ParentClass(\"{child.name}\", parent)")
+            class_name = name
+        elif name.startswith("NamedRange"):
+            name = values[0]
+            ctor_params = "std::string name, ParentClass* parent"
+            ctor_initializer_list.append(f"ParentClass(name, parent)")
+            class_name = f"{name}Type"
+
+            min_value = values[1]
+            max_value = values[2] + 1
+            self.external_includes.add("stdexcept")
+
+        if nested_name == "Choice":
+            for v in nested_values:
+                ctor_initializer_list.append(f"{v}(\"{v}\", this)")
+                member_list.append(f"{nested_type} {v}")
+        elif nested_name == "NamedRange":
+            range_name = nested_values[0]
+            min_value = nested_values[1]
+            max_value = nested_values[2]
+            for v in range(min_value, max_value + 1):
+                ctor_initializer_list.append(f"{range_name}{v}(\"{range_name}{v}\", this)")
+                member_list.append(f"{nested_type} {range_name}{v}")
+
+            method_context = CodeGeneratorContext()
+            method_context.write(f"{nested_type}& {range_name}(int index) {{\n")
+            with method_context as method_scope:
+                for v in range(min_value, max_value + 1):
+                    method_scope.write(f"if (index == {v}) {{\n")
+                    method_scope.indent()
+                    method_scope.write(f"return {range_name}{v};\n")
+                    method_scope.dedent()
+                    method_scope.write("}\n")
+                method_scope.write(f"throw std::runtime_error(\"Given value is outside of allowed range [{min_value};{max_value}]!\");\n")
+                self.external_includes.add("stdexcept")
+            method_context.write("}\n")
+            method_list.append(method_context.get_content())
+
+        ctor_initializer_list = ",\n".join(ctor_initializer_list)
+
+        # generate class code
+        class_code_context = CodeGeneratorContext()
+        class_code_context.write(f"class {class_name} : public ParentClass {{\n")
+
+        # one indentation is lost after the first line when using replace, that`s why we add an additional one for nested classes
+        if class_name.endswith("Type"):
+            class_code_context.indent()
+        
+        class_code_context.write("public:\n")
+        
+        with class_code_context as public_scope:
+            if name.endswith("Collection"):
+                public_scope.write("%NESTED_CLASSES%\n")
+            public_scope.write(f"{class_name}({ctor_params})")
+            if len(ctor_initializer_list) > 0:
+                with public_scope as ctor_initializer_list_scope:
+                    ctor_initializer_list_scope.write(f":\n{ctor_initializer_list}\n")
+                public_scope.write("{\n}\n\n")
+
+            if len(method_list) > 0:
+                public_scope.write("\n\n".join(method_list))
+                public_scope.write("\n")
+
+            member_list = ";\n".join(member_list)
+            public_scope.write(f"{member_list}" + ";\n")
+
+        class_code_context.write("};\n")
+        return class_code_context.get_content()
+
     def __gen_collection_types(self, node: VSSNode, path: str) -> str:
         collection_types = []
         for child in node.children:
-            child_namespace = "::".join(self.__get_namespace_for_node(child))
             if child.type == VSSType.BRANCH:
                 self.includes.add(f"{path}/{child.name}/{child.name}")
 
@@ -153,91 +235,8 @@ class VehicleModelCppGenerator:
 
                     # create all nested classes for this sub-tree
                     for i in range(len(instances) - 1):
-                        name, values = instances[i]
-                        nested_name = instances[i + 1][0] if i + 1 < len(instances) else child.name
-                        nested_values = instances[i + 1][1] if i + 1 < len(instances) else [child.name]
-                        nested_type = instances[i + 1][0] if i + 1 < len(instances) - 1 else f"{child_namespace}::{child.name}"
-
-                        if nested_type == "NamedRange":
-                            nested_type = instances[i + 1][1][0] + "Type"
-
-                        ctor_params = ""
-                        ctor_initializer_list = []
-                        method_list = []
-                        member_list = []
-                        class_name = ""
-
-                        if name.endswith("Collection"):
-                            ctor_params = "ParentClass* parent"
-                            ctor_initializer_list.append(f"ParentClass(\"{child.name}\", parent)")
-                            class_name = name
-                        elif name.startswith("NamedRange"):
-                            name = values[0]
-                            ctor_params = "std::string name, ParentClass* parent"
-                            ctor_initializer_list.append(f"ParentClass(name, parent)")
-                            class_name = f"{name}Type"
-
-                            min_value = values[1]
-                            max_value = values[2] + 1
-                            self.external_includes.add("stdexcept")
-
-                        if nested_name == "Choice":
-                            for v in nested_values:
-                                ctor_initializer_list.append(f"{v}(\"{v}\", this)")
-                                member_list.append(f"{nested_type} {v}")
-                        elif nested_name == "NamedRange":
-                            range_name = nested_values[0]
-                            min_value = nested_values[1]
-                            max_value = nested_values[2]
-                            for v in range(min_value, max_value + 1):
-                                ctor_initializer_list.append(f"{range_name}{v}(\"{range_name}{v}\", this)")
-                                member_list.append(f"{nested_type} {range_name}{v}")
-
-                            method_context = CodeGeneratorContext()
-                            method_context.write(f"{nested_type}& {range_name}(int index) {{\n")
-                            with method_context as method_scope:
-                                for v in range(min_value, max_value + 1):
-                                    method_scope.write(f"if (index == {v}) {{\n")
-                                    method_scope.indent()
-                                    method_scope.write(f"return {range_name}{v};\n")
-                                    method_scope.dedent()
-                                    method_scope.write("}\n")
-                                method_scope.write(f"throw std::runtime_error(\"Given value is outside of allowed range [{min_value};{max_value}]!\");\n")
-                                self.external_includes.add("stdexcept")
-                            method_context.write("}\n")
-                            method_list.append(method_context.get_content())
-
-                        ctor_initializer_list = ",\n".join(ctor_initializer_list)
-
-                        # generate class code
-                        class_code_context = CodeGeneratorContext()
-                        class_code_context.write(f"class {class_name} : public ParentClass {{\n")
-
-                        # one indentation is lost after the first line when using replace, that`s why we add an additional one for nested classes
-                        if class_name.endswith("Type"):
-                            class_code_context.indent()
-                        
-                        class_code_context.write("public:\n")
-                        
-                        with class_code_context as public_scope:
-                            if name.endswith("Collection"):
-                                public_scope.write("%NESTED_CLASSES%\n\n")
-                            public_scope.write(f"{class_name}({ctor_params})")
-                            if len(ctor_initializer_list) > 0:
-                                with public_scope as ctor_initializer_list_scope:
-                                    ctor_initializer_list_scope.write(f":\n{ctor_initializer_list}\n")
-
-                                public_scope.write("{\n}\n\n")
-
-                            if len(method_list) > 0:
-                                public_scope.write("\n\n".join(method_list))
-                                public_scope.write("\n")
-
-                            member_list = ";\n".join(member_list)
-                            public_scope.write(f"{member_list}" + ";\n")
-
-                        class_code_context.write("};")
-                        generated_classes.append(class_code_context.get_content())
+                        nested_class = self.__gen_nested_class(child, instances, i)
+                        generated_classes.append(nested_class)
                         
                     collection_types.append(generated_classes[0].replace("%NESTED_CLASSES%", "\n\n".join(generated_classes[1:])))
         
@@ -249,67 +248,57 @@ class VehicleModelCppGenerator:
 
         self.__gen_header(node)
         self.__gen_imports(node)
-        self.ctx_header.write(self.__generate_opening_namespace_text("velocitas", node))
+        self.ctx_header.write(self.__generate_opening_namespace_text(self.root_namespace, node))
         self.ctx_header.write("using ParentClass = Model;\n\n")
         self.__gen_model_docstring(node)
         self.ctx_header.write(f"class {node.name} : public ParentClass {{\n")
         self.ctx_header.write("public:\n")
 
-        with self.ctx_header as header_public, self.ctx_source as source_public:
+        with self.ctx_header as header_public:
             header_public.write(collection_types)
-            header_public.write("\n\n")
+            header_public.write("\n")
 
             if is_root:
-                header_public.write(f"{node.name}();\n")
+                header_public.write(f"{node.name}() :\n")
+                header_public.indent()
+                header_public.write("ParentClass(\"Vehicle\")")
             else:
-                header_public.write(f"{node.name}(const std::string& name, ParentClass* parent);\n")
-
-            if node.children:
-                header_public.write("\n")
-
-            if is_root:
-                source_public.write(f"{node.name}::{node.name}() :\n")
-                source_public.indent()
-                source_public.write("ParentClass(\"Vehicle\")")
-            else:
-                source_public.write(f"{node.name}::{node.name}(const std::string& name, ParentClass* parent) :\n")
-                source_public.indent() 
-                source_public.write("ParentClass(name, parent)")
+                header_public.write(f"{node.name}(const std::string& name, ParentClass* parent) :\n")
+                header_public.indent() 
+                header_public.write("ParentClass(name, parent)")
+            
+            header_public.write("%MEMBER%\n")
+            header_public.dedent()
+            header_public.write("{}\n\n")
 
             # create members
+            member = ""
             for child in node.children:
                 child_namespace = "::".join(self.__get_namespace_for_node(child))
                 self.__document_member(child)
                 
                 if child.type.value in ("attribute", "sensor", "actuator"):
                     header_public.write(f"DataPoint{self.__get_data_type(child.datatype.value)} {child.name};\n\n")
-                    source_public.write(",\n" + f"{child.name}(\"{child.name}\", this)")
+                    member += ",\n\t\t" + f"{child.name}(\"{child.name}\", this)"
                 
                 if child.type == VSSType.BRANCH:
                     if child.instances:
                         header_public.write(
-                            f"{child.name}Collection {child.name};\n"
+                            f"{child.name}Collection {child.name};\n\n"
                         )
-                        source_public.write(",\n" + f"{child.name}(this)")
+                        member += ",\n\t\t" + f"{child.name}(this)"
                     else:
                         header_public.write(f"{child_namespace}::{child.name} {child.name};\n\n")
-                        source_public.write(",\n" + f"{child.name}(\"{child.name}\", this)")
+                        member += ",\n\t\t" + f"{child.name}(\"{child.name}\", this)"
 
         self.ctx_header.write("};\n")
-        self.ctx_source.write("\n{}\n")
-
-        self.ctx_source.dedent()
 
         self.__gen_footer(node)
 
         with open(os.path.join(path, f"{node.name}.hpp"), "w", encoding="utf-8") as file:
-            file.write(self.ctx_header.get_content())
-
-        with open(os.path.join(path, f"{node.name}.cpp"), "w", encoding="utf-8") as file:
-            file.write(self.ctx_source.get_content())
+            file.write(self.ctx_header.get_content().replace("%MEMBER%", member))
 
         self.ctx_header.reset()
-        self.ctx_source.reset()
 
     def __gen_instances(self, node: VSSNode) -> list[tuple[str, str]]:
         instances = node.instances
@@ -350,18 +339,9 @@ class VehicleModelCppGenerator:
 
         raise ValueError("", "", f"is of type {type(i)} which is unsupported")
 
-    def __get_data_type(self, data_type: str):
+    def __get_data_type(self, data_type: str) -> str:
         # there are no 8bit or 16bit types in grpc...
         data_type = data_type.replace("8", "32").replace("16", "32")
         if data_type[-1] == "]":
             return data_type[0].upper() + data_type[1:-2] + "Array"
         return data_type[0].upper() + data_type[1:]
-
-    def __convert_to_snake_case(self, name: str) -> str:
-        last_letter_was_upper = True  # start with True since we want to start lowercase
-        result = ""
-        for letter in name:
-            result = result + (letter.lower() if last_letter_was_upper else letter)
-            last_letter_was_upper = letter.isupper()
-
-        return result
