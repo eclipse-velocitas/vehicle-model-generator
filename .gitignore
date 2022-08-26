@@ -147,3 +147,6 @@ output/
 
 # VSS Submodule
 vehicle_signal_specification/
+
+# macOS specific
+.DS_Store

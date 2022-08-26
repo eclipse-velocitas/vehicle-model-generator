@@ -20,67 +20,7 @@ import shutil
 from typing import Set
 
 from vspec.model.vsstree import VSSNode
-
-
-class CodeGeneratorContext:
-    """CodeGeneratorContext."""
-
-    def __init__(self):
-        """init."""
-        self.model_code = []
-        self.tab = "    "
-        self.line_break = "\n"
-        self.level = 0
-        self.position = 0
-
-    def reset(self):
-        """Reset the generated model code."""
-        self.model_code = []
-        self.position = 0
-
-    def set_position(self, position: int):
-        """Set the position of the writing cursor in the generated model code."""
-        self.position = position
-
-    def get_content(self):
-        """Return the content of the generated model code."""
-        code = "".join(self.model_code)
-        return code
-
-    def write(self, text: str, index: int = None, strip_lines: bool = False):
-        """Write to the generated model code at the specified index."""
-        lines = text.split(self.line_break)
-
-        i = 0
-        for line in lines:
-            if strip_lines:
-                line = line.strip()
-
-            line_prefix = self.tab * self.level if line else ""
-            line_suffix = self.line_break if i < (len(lines) - 1) else ""
-            i += 1
-            if index is not None:
-                self.model_code.insert(index, line_prefix + line + line_suffix)
-            else:
-                # if appending at the current position, consider if the previous
-                # line was terminated to apply the line prefix
-                if self.position > 0:
-                    prev_line = self.model_code[self.position - 1]
-                    if len(prev_line) > 0 and not prev_line[-1] == self.line_break:
-                        line_prefix = ""
-                self.model_code.insert(self.position, line_prefix + line + line_suffix)
-                self.position += 1
-
-    def indent(self):
-        """Increase the indentation level."""
-        self.level = self.level + 1
-
-    def dedent(self):
-        """Decrease the indentation level."""
-        if self.level == 0:
-            raise SyntaxError("internal error in code generator")
-        self.level = self.level - 1
-
+from utils import CodeGeneratorContext
 
 class VehicleModelPythonGenerator:
     """Generate python code for vehicle model."""
