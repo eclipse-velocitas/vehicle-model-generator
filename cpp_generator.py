@@ -41,23 +41,23 @@ class VehicleModelCppGenerator:
 
     def generate(self):
         """Generate c++ code for vehicle model."""
-        path = os.path.join(self.target_folder, "include")
-
+        self.root_path = os.path.join(self.target_folder, "include")
+        path = os.path.join(self.root_path, self.target_folder)
         if os.path.exists(path):
             shutil.rmtree(path)
         os.makedirs(path)
 
-        self.__gen_model(self.root, path, True)
-        self.__visit_nodes(self.root, path)
+        self.__gen_model(self.root, self.target_folder, True)
+        self.__visit_nodes(self.root, self.target_folder)
 
-    def __visit_nodes(self, node: VSSNode, path: str):
+    def __visit_nodes(self, node: VSSNode, parent_path: str):
         """Recursively render nodes."""
         for child in node.children:
-            child_path = os.path.join(path, child.name)
-
+            child_path = os.path.join(parent_path, child.name)
+            path = os.path.join(self.root_path, child_path)
             if child.type == VSSType.BRANCH:
-                if not os.path.exists(child_path):
-                    os.makedirs(child_path)
+                if not os.path.exists(path):
+                    os.makedirs(path)
 
                 self.__gen_model(child, child_path)
                 self.__visit_nodes(child, child_path)
@@ -295,7 +295,7 @@ class VehicleModelCppGenerator:
 
         self.__gen_footer(node)
 
-        with open(os.path.join(path, f"{node.name}.hpp"), "w", encoding="utf-8") as file:
+        with open(os.path.join(self.root_path, path, f"{node.name}.hpp"), "w", encoding="utf-8") as file:
             file.write(self.ctx_header.get_content().replace("%MEMBER%", member))
 
         self.ctx_header.reset()
