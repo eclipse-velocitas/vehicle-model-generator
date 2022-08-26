@@ -135,7 +135,7 @@ class VehicleModelCppGenerator:
             self.ctx_header.write(f"* Allowed values: {allowed_values}\n")
         self.ctx_header.write("**/\n")
 
-    def __gen_nested_class(self, child: VSSNode, instances: list[tuple[str, str]], index: int) -> str:
+    def __gen_nested_class(self, child: VSSNode, instances: list[tuple[str, list]], index: int) -> str:
 
         child_namespace = "::".join(self.__get_namespace_for_node(child))
         name, values = instances[index]
@@ -183,9 +183,8 @@ class VehicleModelCppGenerator:
             with method_context as method_scope:
                 for v in range(min_value, max_value + 1):
                     method_scope.write(f"if (index == {v}) {{\n")
-                    method_scope.indent()
-                    method_scope.write(f"return {range_name}{v};\n")
-                    method_scope.dedent()
+                    with method_scope as return_scope:
+                        return_scope.write(f"return {range_name}{v};\n")
                     method_scope.write("}\n")
                 method_scope.write(f"throw std::runtime_error(\"Given value is outside of allowed range [{min_value};{max_value}]!\");\n")
                 self.external_includes.add("stdexcept")
@@ -249,6 +248,7 @@ class VehicleModelCppGenerator:
         self.__gen_header(node)
         self.__gen_imports(node)
         self.ctx_header.write(self.__generate_opening_namespace_text(self.root_namespace, node))
+        # Provide an alias for the parent class to avoid name conflicts with members
         self.ctx_header.write("using ParentClass = Model;\n\n")
         self.__gen_model_docstring(node)
         self.ctx_header.write(f"class {node.name} : public ParentClass {{\n")
@@ -300,12 +300,12 @@ class VehicleModelCppGenerator:
 
         self.ctx_header.reset()
 
-    def __gen_instances(self, node: VSSNode) -> list[tuple[str, str]]:
+    def __gen_instances(self, node: VSSNode) -> list[tuple[str, list]]:
         instances = node.instances
 
         reg_ex = r"\w+\[\d+,(\d+)\]"
 
-        result: list[tuple[str, str]] = []
+        result: list[tuple[str, list]] = []
 
         complex_list = False
         for i in instances:
@@ -320,7 +320,7 @@ class VehicleModelCppGenerator:
 
         return result
 
-    def __parse_instances(self, reg_ex, i) -> tuple[str, str]:
+    def __parse_instances(self, reg_ex, i) -> tuple[str, list]:
 
         # parse string instantiation elements (e.g. Row[1,5])
         if isinstance(i, str):
