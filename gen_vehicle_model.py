@@ -17,14 +17,12 @@
 """Convert all vspec input files to Velocitas Python Vehicle Model."""
 
 import argparse
-import os
 import sys
-
-from python_generator import VehicleModelPythonGenerator
-from cpp_generator import VehicleModelCppGenerator
 
 import vspec
 
+from cpp_generator import VehicleModelCppGenerator
+from python_generator import VehicleModelPythonGenerator
 
 if __name__ == "__main__":
     # The arguments we accept
@@ -99,11 +97,19 @@ if __name__ == "__main__":
 
         if args.language == "python":
             print("Recursing tree and creating Python code...")
-            VehicleModelPythonGenerator(tree, args.target_folder, args.name,).generate()
+            VehicleModelPythonGenerator(
+                tree,
+                args.target_folder,
+                args.name,
+            ).generate()
             print("All done.")
         elif args.language == "cpp":
             print("Recursing tree and creating c++ code...")
-            VehicleModelCppGenerator(tree, args.target_folder, args.name,).generate()
+            VehicleModelCppGenerator(
+                tree,
+                args.target_folder,
+                args.name,
+            ).generate()
             print("All done.")
         else:
             print(f"Language {args.language} is not supported yet.")

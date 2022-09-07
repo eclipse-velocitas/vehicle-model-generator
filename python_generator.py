@@ -20,7 +20,9 @@ import shutil
 from typing import Set
 
 from vspec.model.vsstree import VSSNode
+
 from utils import CodeGeneratorContext
+
 
 class VehicleModelPythonGenerator:
     """Generate python code for vehicle model."""

@@ -49,7 +49,14 @@ class CodeGeneratorContext:
         code = "".join(self.model_code)
         return code
 
-    def write(self, text: str, index: int = None, strip_lines: bool = False, replace_char: str = '|', ignore_initial_line=False):
+    def write(
+        self,
+        text: str,
+        index: int = None,
+        strip_lines: bool = False,
+        replace_char: str = "|",
+        ignore_initial_line=False,
+    ):
         """Write to the generated model code at the specified index."""
         lines = text.split(self.line_break)
 
