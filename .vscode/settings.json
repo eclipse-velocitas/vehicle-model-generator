@@ -12,4 +12,5 @@
     "python.testing.pytestArgs": [
       "./tests/"
   ],
+  "mypy.runUsingActiveInterpreter": true,
 }
