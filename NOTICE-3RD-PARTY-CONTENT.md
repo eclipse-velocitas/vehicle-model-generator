@@ -12,7 +12,7 @@
 |pluggy|1.0.0|MIT|
 |py|1.11.0|MIT|
 |pyparsing|3.0.9|MIT|
-|pytest|7.1.2|MIT|
+|pytest|7.1.3|MIT|
 |PyYAML|6.0|MIT|
 |rdflib|6.2.0|New BSD|
 |setuptools|58.1.0|MIT|
@@ -22,4 +22,4 @@
 ## Workflows
 | Dependency | Version | License |
 |:-----------|:-------:|--------:|
-|actions/checkout|v2|MIT License|
+|actions/checkout|v3|MIT License|
