@@ -24,6 +24,7 @@
             "program": "${workspaceFolder}/gen_vehicle_model.py",
             "console": "internalConsole",
             "args": [
+                "-T sdv_model",
                 "-I ./vehicle_signal_specification/spec",
                 "./vehicle_signal_specification/spec/VehicleSignalSpecification.vspec"
             ]
