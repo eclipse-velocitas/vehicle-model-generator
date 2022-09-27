@@ -171,7 +171,8 @@ class VehicleModelPythonGenerator:
         for child in node.children:
             if child.type.value in ("attribute", "sensor", "actuator"):
                 self.ctx.write(
-                    f"self.{child.name} = DataPoint{self.__get_datatype(child.datatype.value)}"
+                    f"self.{child.name} = \
+                        DataPoint{self.__get_datatype(child.datatype.value)}"
                     f'("{child.name}", self)\n'
                 )
                 self.model_imports.add(
