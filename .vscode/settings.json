@@ -20,4 +20,5 @@
   "python.linting.banditArgs": [
     "-c setup.cfg"
   ],
+  "mypy.runUsingActiveInterpreter": true,
 }
