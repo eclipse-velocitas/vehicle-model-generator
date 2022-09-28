@@ -81,21 +81,22 @@ class VssCollection:
 
         raise ValueError("", "", f"is of type {type(instance)} which is unsupported")
 
-    def __gen_collection_types(self, name, instances) -> tuple[str, list]:
-        _type_name = f"{name}{_TYPE_SUFFIX}"
+    def __gen_collection_types(
+        self, name, type_name, vss_instance: VssInstance
+    ) -> tuple[str, list]:
         result = list()
-        print(f"{' ' * 5}- {_type_name:25}{instances}")
-        result.append(f"{self.ctx.tab}class {_type_name}(Model):")
+        print(f"{' ' * 5}- {type_name:25}{vss_instance.content}")
+        result.append(f"{self.ctx.tab}class {type_name}(Model):")
         result.append(f"{self.ctx.tab * 2}def __init__(self, name, parent):")
         result.append(f"{self.ctx.tab * 3}super().__init__(parent)")
         result.append(f"{self.ctx.tab * 3}self.name = name")
 
-        for instance in instances:
+        for instance in vss_instance.content:
             result.append(
                 f'{self.ctx.tab * 3}self.{instance} = {name}("{instance}", self)'
             )
 
-        return (_type_name, result)
+        return (type_name, result)
 
     def __gen_getter(self, name, instances, indent_level) -> List[str]:
         result = list()
@@ -146,7 +147,7 @@ class VssCollection:
             # if instance_list_len > 1
             #   -> Multi-level (nested) instance type. E.g ['Row[1,2]', ['Left', 'Right']]
             if instance_list_len > 1:
-                instance_type = f"self.{node.name}{_TYPE_SUFFIX}"
+                instance_type = f"{vss_instance.name}{_TYPE_SUFFIX}"
                 has_inner_types = True
 
         else:
@@ -154,9 +155,12 @@ class VssCollection:
             vss_instance = self.__parse_instances(_COLLECTION_REG_EX, node.instances)
 
         instance_list = vss_instance.content
+
+        # check if self needs to be added due to the internal type.
+        prefix = "self." if has_inner_types else ""
         for instance in instance_list:
             result.append(
-                f'{self.ctx.tab * 2}self.{instance} = {instance_type}("{instance}", self)'
+                f'{self.ctx.tab * 2}self.{instance} = {prefix}{instance_type}("{instance}", self)'
             )
         # add getter
         result.extend(self.__gen_getter(vss_instance.name, instance_list, 1))
@@ -164,20 +168,21 @@ class VssCollection:
         # Parse Inner types
         if has_inner_types:
             # add inner types
-            vss_inner_instance = self.__parse_instances(
+            inner_instances = self.__parse_instances(
                 _COLLECTION_REG_EX, node.instances[1]
             )
-            inner_instances = vss_inner_instance.content
-            inner_types = self.__gen_collection_types(node.name, inner_instances)
+            inner_types = self.__gen_collection_types(
+                node.name, instance_type, inner_instances
+            )
             result.extend(inner_types[1])
             # add getter
-            if vss_inner_instance.is_range:
+            if inner_instances.is_range:
                 result.extend(
-                    self.__gen_getter(vss_inner_instance.name, inner_instances, 2)
+                    self.__gen_getter(inner_instances.name, inner_instances.content, 2)
                 )
             else:
                 result.extend(
-                    self.__gen_getter(_DEFAULT_RANGE_NAME, inner_instances, 2)
+                    self.__gen_getter(_DEFAULT_RANGE_NAME, inner_instances.content, 2)
                 )
 
         return result
