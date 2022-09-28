@@ -21,8 +21,8 @@ from typing import List, Set
 from vspec.model.constants import VSSType
 from vspec.model.vsstree import VSSNode
 
+from python.vss_collection import VssCollection
 from utils import CodeGeneratorContext
-from vss_collection import VssCollection
 
 
 class VehicleModelPythonGenerator:
@@ -185,7 +185,7 @@ class VehicleModelPythonGenerator:
             if child.type.value == VSSType.BRANCH.value:
                 # if has instances, a collection will be created
                 if child.instances:
-                    collection = VssCollection(child, self.ctx)
+                    collection = VssCollection(child)
                     self.collections.append(collection)
                     self.ctx.write(
                         f'self.{child.name} = {collection.name}("{child.name}", self)\n'

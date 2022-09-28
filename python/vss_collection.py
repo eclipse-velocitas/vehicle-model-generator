@@ -49,9 +49,9 @@ class VssInstance:
 class VssCollection:
     """VSS Collection Object."""
 
-    def __init__(self, node: VSSNode, ctx: CodeGeneratorContext):
+    def __init__(self, node: VSSNode):
         """Construct of new collection object."""
-        self.ctx = ctx
+        self.ctx = CodeGeneratorContext()
         self.name = f"{node.name}{_COLLECTION_SUFFIX}"
         self.content_list = self.__gen_collection(node)
 

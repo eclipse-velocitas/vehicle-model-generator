@@ -22,8 +22,8 @@ import sys
 
 import vspec
 
-from cpp_generator import VehicleModelCppGenerator
-from python_generator import VehicleModelPythonGenerator
+from cpp.cpp_generator import VehicleModelCppGenerator
+from python.python_generator import VehicleModelPythonGenerator
 
 if __name__ == "__main__":
     # The arguments we accept
