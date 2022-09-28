@@ -77,7 +77,8 @@ repos:
     rev: "v0.920"
     hooks:
       - id: mypy
-        args: ["--exclude=(vehicle_model|vehicle_signal_specification|proto)", "."]
+        args:
+          ["--exclude=(vehicle_model|vehicle_signal_specification|proto)", "."]
         language: system
         pass_filenames: false
 
@@ -95,7 +96,7 @@ repos:
     rev: v1.1.13
     hooks:
       - id: insert-license
-        files: '.*\.(py|pyi|yaml|yml|sh|helmignore|dockerignore|gitignore)$'
+        files: '.*\.(py|pyi|yaml|yml|sh|helmignore|dockerignore|gitignore|Dockerfile.*)$'
         args:
           - --license-filepath
           - license_header.txt
@@ -108,10 +109,3 @@ repos:
           - license_header.txt
           - --comment-style
           - //
-      - id: insert-license
-        files: "Dockerfile.*"
-        args:
-          - --license-filepath
-          - license_header.txt
-          - --comment-style
-          - "#"
