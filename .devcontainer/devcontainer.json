@@ -51,7 +51,9 @@
 		"cschleiden.vscode-github-actions",
 		"ms-vsliveshare.vsliveshare-pack",
 		"dotjoshjohnson.xml",
-		"matangover.mypy"
+		"matangover.mypy",
+		"elagil.pre-commit-helper",
+		"ms-python.isort"
 	],
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],

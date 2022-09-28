@@ -1,16 +1,22 @@
 {
-    "python.linting.banditEnabled": true,
-    "python.linting.flake8Enabled": true,
-    "python.linting.pylintEnabled": true,
-    "python.linting.mypyEnabled": false,
-    "python.linting.pydocstyleEnabled": true,
-    "python.linting.enabled": true,
-    "python.linting.flake8Args": ["--ignore=E121,E402,F481,E501,F841", "--max-line-length=89"],
-    "python.formatting.provider": "black",
-    "python.testing.unittestEnabled": false,
-    "python.testing.pytestEnabled": true,
-    "python.testing.pytestArgs": [
-      "./tests/"
+  "python.linting.banditEnabled": true,
+  "python.linting.flake8Enabled": true,
+  "python.linting.pylintEnabled": true,
+  "python.linting.mypyEnabled": true,
+  "python.linting.pydocstyleEnabled": true,
+  "python.linting.enabled": true,
+  "python.linting.flake8Args": [
+    "--config=setup.cfg"
+  ],
+  "python.formatting.provider": "black",
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true,
+  "python.testing.pytestArgs": [
+    "./tests/"
   ],
   "mypy.runUsingActiveInterpreter": true,
+  "pre-commit-helper.runOnSave": "all hooks",
+  "python.linting.banditArgs": [
+    "-c setup.cfg"
+  ],
 }

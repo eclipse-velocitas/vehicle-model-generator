@@ -19,9 +19,11 @@ import re
 import shutil
 from typing import Set
 
-from vspec.model.vsstree import VSSNode
 from vspec.model.constants import VSSType
+from vspec.model.vsstree import VSSNode
+
 from utils import CodeGeneratorContext
+
 
 class VehicleModelCppGenerator:
     """Generate c++ code for vehicle model."""
@@ -62,10 +64,18 @@ class VehicleModelCppGenerator:
                 self.__gen_model(child, child_path)
                 self.__visit_nodes(child, child_path)
 
-    def __generate_opening_namespace_text(self, root_namespace: str, node: VSSNode) -> str:
-        return "namespace " + "::".join([root_namespace] + self.__get_namespace_for_node(node)) + " {\n"
+    def __generate_opening_namespace_text(
+        self, root_namespace: str, node: VSSNode
+    ) -> str:
+        return (
+            "namespace "
+            + "::".join([root_namespace] + self.__get_namespace_for_node(node))
+            + " {\n"
+        )
 
-    def __generate_closing_namespace_text(self, root_namespace: str, node: VSSNode) -> str:
+    def __generate_closing_namespace_text(
+        self, root_namespace: str, node: VSSNode
+    ) -> str:
         text = "::".join([root_namespace] + self.__get_namespace_for_node(node))
         return "} // namespace " + text + "\n"
 
@@ -85,18 +95,20 @@ class VehicleModelCppGenerator:
         )
 
     def __gen_footer(self, node: VSSNode):
-        self.ctx_header.write(self.__generate_closing_namespace_text(self.root_namespace, node))
+        self.ctx_header.write(
+            self.__generate_closing_namespace_text(self.root_namespace, node)
+        )
         self.ctx_header.write(f"#endif // {self.__generate_guard_name(node)}\n")
 
     def __gen_imports(self, node: VSSNode):
-        self.ctx_header.write(f"#include \"sdk/DataPoint.h\"\n")
-        self.ctx_header.write(f"#include \"sdk/Model.h\"\n")
+        self.ctx_header.write(f'#include "sdk/DataPoint.h"\n')
+        self.ctx_header.write(f'#include "sdk/Model.h"\n')
         self.ctx_header.write("\n")
-        
+
         for imp in sorted(self.includes):
             if imp[0] == ".":
                 imp = imp[2:]
-            self.ctx_header.write(f"#include \"{imp}.hpp\"\n")
+            self.ctx_header.write(f'#include "{imp}.hpp"\n')
 
         if len(self.includes) > 0:
             self.ctx_header.write("\n")
@@ -111,12 +123,14 @@ class VehicleModelCppGenerator:
         self.external_includes.clear()
 
     def __gen_model_docstring(self, node: VSSNode):
-        self.ctx_header.write(f'/** {node.name} model. */\n')
+        self.ctx_header.write(f"/** {node.name} model. */\n")
 
     def __document_member(self, node: VSSNode):
         self.ctx_header.write("/**\n")
         if node.type.value == "attribute":
-            self.ctx_header.write(f"* {node.name}: {node.type.value} ({node.datatype.value})\n")
+            self.ctx_header.write(
+                f"* {node.name}: {node.type.value} ({node.datatype.value})\n"
+            )
         else:
             self.ctx_header.write(f"* {node.name}: {node.type.value}\n")
 
@@ -135,17 +149,27 @@ class VehicleModelCppGenerator:
             self.ctx_header.write(f"* Allowed values: {allowed_values}\n")
         self.ctx_header.write("**/\n")
 
-    def __gen_nested_class(self, child: VSSNode, instances: list[tuple[str, list]], index: int) -> str:
+    def __gen_nested_class(
+        self, child: VSSNode, instances: list[tuple[str, list]], index: int
+    ) -> str:
 
         child_namespace = "::".join(self.__get_namespace_for_node(child))
         name, values = instances[index]
-        nested_name = instances[index + 1][0] if index + 1 < len(instances) else child.name
-        nested_values = instances[index + 1][1] if index + 1 < len(instances) else [child.name]
-        nested_type = instances[index + 1][0] if index + 1 < len(instances) - 1 else f"{child_namespace}::{child.name}"
+        nested_name = (
+            instances[index + 1][0] if index + 1 < len(instances) else child.name
+        )
+        nested_values = (
+            instances[index + 1][1] if index + 1 < len(instances) else [child.name]
+        )
+        nested_type = (
+            instances[index + 1][0]
+            if index + 1 < len(instances) - 1
+            else f"{child_namespace}::{child.name}"
+        )
 
         if nested_type == "NamedRange":
             nested_type = instances[index + 1][1][0] + "Type"
-        
+
         ctor_params = ""
         ctor_initializer_list = []
         method_list = []
@@ -154,7 +178,7 @@ class VehicleModelCppGenerator:
 
         if name.endswith("Collection"):
             ctor_params = "ParentClass* parent"
-            ctor_initializer_list.append(f"ParentClass(\"{child.name}\", parent)")
+            ctor_initializer_list.append(f'ParentClass("{child.name}", parent)')
             class_name = name
         elif name.startswith("NamedRange"):
             name = values[0]
@@ -168,14 +192,16 @@ class VehicleModelCppGenerator:
 
         if nested_name == "Choice":
             for v in nested_values:
-                ctor_initializer_list.append(f"{v}(\"{v}\", this)")
+                ctor_initializer_list.append(f'{v}("{v}", this)')
                 member_list.append(f"{nested_type} {v}")
         elif nested_name == "NamedRange":
             range_name = nested_values[0]
             min_value = nested_values[1]
             max_value = nested_values[2]
             for v in range(min_value, max_value + 1):
-                ctor_initializer_list.append(f"{range_name}{v}(\"{range_name}{v}\", this)")
+                ctor_initializer_list.append(
+                    f'{range_name}{v}("{range_name}{v}", this)'
+                )
                 member_list.append(f"{nested_type} {range_name}{v}")
 
             method_context = CodeGeneratorContext()
@@ -186,7 +212,10 @@ class VehicleModelCppGenerator:
                     with method_scope as return_scope:
                         return_scope.write(f"return {range_name}{v};\n")
                     method_scope.write("}\n")
-                method_scope.write(f"throw std::runtime_error(\"Given value is outside of allowed range [{min_value};{max_value}]!\");\n")
+                method_scope.write(
+                    f'throw std::runtime_error("Given value is outside of allowed range\
+                        [{min_value};{max_value}]!");\n'
+                )
                 self.external_includes.add("stdexcept")
             method_context.write("}\n")
             method_list.append(method_context.get_content())
@@ -195,14 +224,18 @@ class VehicleModelCppGenerator:
 
         # generate class code
         class_code_context = CodeGeneratorContext()
-        class_code_context.write(f"class {class_name} : public ParentClass {{\n")
+        class_code_context.write(
+            f"class {class_name} : \
+                                 public ParentClass {{\n"
+        )
 
-        # one indentation is lost after the first line when using replace, that`s why we add an additional one for nested classes
+        # one indentation is lost after the first line when using replace,
+        # that`s why we add an additional one for nested classes
         if class_name.endswith("Type"):
             class_code_context.indent()
-        
+
         class_code_context.write("public:\n")
-        
+
         with class_code_context as public_scope:
             if name.endswith("Collection"):
                 public_scope.write("%NESTED_CLASSES%\n")
@@ -229,25 +262,34 @@ class VehicleModelCppGenerator:
                 self.includes.add(f"{path}/{child.name}/{child.name}")
 
                 if child.instances:
-                    instances = [(f"{child.name}Collection", None)] + self.__gen_instances(child)
+                    instances = [
+                        (f"{child.name}Collection", None)
+                    ] + self.__gen_instances(child)
                     generated_classes = []
 
                     # create all nested classes for this sub-tree
                     for i in range(len(instances) - 1):
                         nested_class = self.__gen_nested_class(child, instances, i)
                         generated_classes.append(nested_class)
-                        
-                    collection_types.append(generated_classes[0].replace("%NESTED_CLASSES%", "\n\n".join(generated_classes[1:])))
-        
+
+                    collection_types.append(
+                        generated_classes[0].replace(
+                            "%NESTED_CLASSES%", "\n\n".join(generated_classes[1:])
+                        )
+                    )
+
         return "\n\n".join(collection_types)
 
     def __gen_model(self, node: VSSNode, path: str, is_root=False):
-        # must be done before generating the imports, since it is adding imports to the list
+        # must be done before generating the imports, since it is adding imports
+        # to the list
         collection_types = self.__gen_collection_types(node, path)
 
         self.__gen_header(node)
         self.__gen_imports(node)
-        self.ctx_header.write(self.__generate_opening_namespace_text(self.root_namespace, node))
+        self.ctx_header.write(
+            self.__generate_opening_namespace_text(self.root_namespace, node)
+        )
         # Provide an alias for the parent class to avoid name conflicts with members
         self.ctx_header.write("using ParentClass = Model;\n\n")
         self.__gen_model_docstring(node)
@@ -261,12 +303,14 @@ class VehicleModelCppGenerator:
             if is_root:
                 header_public.write(f"{node.name}() :\n")
                 header_public.indent()
-                header_public.write("ParentClass(\"Vehicle\")")
+                header_public.write('ParentClass("Vehicle")')
             else:
-                header_public.write(f"{node.name}(const std::string& name, ParentClass* parent) :\n")
-                header_public.indent() 
+                header_public.write(
+                    f"{node.name}(const std::string& name, ParentClass* parent) :\n"
+                )
+                header_public.indent()
                 header_public.write("ParentClass(name, parent)")
-            
+
             header_public.write("%MEMBER%\n")
             header_public.dedent()
             header_public.write("{}\n\n")
@@ -276,26 +320,33 @@ class VehicleModelCppGenerator:
             for child in node.children:
                 child_namespace = "::".join(self.__get_namespace_for_node(child))
                 self.__document_member(child)
-                
+
                 if child.type.value in ("attribute", "sensor", "actuator"):
-                    header_public.write(f"DataPoint{self.__get_data_type(child.datatype.value)} {child.name};\n\n")
-                    member += ",\n\t\t" + f"{child.name}(\"{child.name}\", this)"
-                
+                    header_public.write(
+                        f"DataPoint{self.__get_data_type(child.datatype.value)} \
+                            {child.name};\n\n"
+                    )
+                    member += ",\n\t\t" + f'{child.name}("{child.name}", this)'
+
                 if child.type == VSSType.BRANCH:
                     if child.instances:
-                        header_public.write(
-                            f"{child.name}Collection {child.name};\n\n"
-                        )
+                        header_public.write(f"{child.name}Collection {child.name};\n\n")
                         member += ",\n\t\t" + f"{child.name}(this)"
                     else:
-                        header_public.write(f"{child_namespace}::{child.name} {child.name};\n\n")
-                        member += ",\n\t\t" + f"{child.name}(\"{child.name}\", this)"
+                        header_public.write(
+                            f"{child_namespace}::{child.name} {child.name};\n\n"
+                        )
+                        member += ",\n\t\t" + f'{child.name}("{child.name}", this)'
 
         self.ctx_header.write("};\n")
 
         self.__gen_footer(node)
 
-        with open(os.path.join(self.root_path, path, f"{node.name}.hpp"), "w", encoding="utf-8") as file:
+        with open(
+            os.path.join(self.root_path, path, f"{node.name}.hpp"),
+            "w",
+            encoding="utf-8",
+        ) as file:
             file.write(self.ctx_header.get_content().replace("%MEMBER%", member))
 
         self.ctx_header.reset()
@@ -329,13 +380,13 @@ class VehicleModelCppGenerator:
                 range_name = inst_range_arr[0]
                 lower_bound = int(inst_range_arr[1])
                 upper_bound = int(inst_range_arr[2])
-                return ('NamedRange', [range_name, lower_bound, upper_bound])
+                return ("NamedRange", [range_name, lower_bound, upper_bound])
 
             raise ValueError("", "", "instantiation type not supported")
 
         # Use list elements for instances (e.g. ["LEFT","RIGHT"])
         if isinstance(i, list):
-            return ('Choice', i)
+            return ("Choice", i)
 
         raise ValueError("", "", f"is of type {type(i)} which is unsupported")
 
