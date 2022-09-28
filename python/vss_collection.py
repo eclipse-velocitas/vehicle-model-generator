@@ -83,7 +83,7 @@ class VssCollection:
 
     def __gen_collection_types(
         self, name, type_name, vss_instance: VssInstance
-    ) -> tuple[str, list]:
+    ) -> list:
         result = list()
         print(f"{' ' * 5}- {type_name:25}{vss_instance.content}")
         result.append(f"{self.ctx.tab}class {type_name}(Model):")
@@ -96,7 +96,7 @@ class VssCollection:
                 f'{self.ctx.tab * 3}self.{instance} = {name}("{instance}", self)'
             )
 
-        return (type_name, result)
+        return result
 
     def __gen_getter(self, name, instances, indent_level) -> List[str]:
         result = list()
@@ -174,7 +174,7 @@ class VssCollection:
             inner_types = self.__gen_collection_types(
                 node.name, instance_type, inner_instances
             )
-            result.extend(inner_types[1])
+            result.extend(inner_types)
             # add getter
             if inner_instances.is_range:
                 result.extend(
