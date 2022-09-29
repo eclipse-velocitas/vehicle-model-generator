@@ -24,10 +24,10 @@
             "program": "${workspaceFolder}/gen_vehicle_model.py",
             "console": "internalConsole",
             "args": [
-                "-Tsdv_model",
-                "-Nsdv_model",
-                "-l${input:languageId}",
-                "-I ./vehicle_signal_specification/spec",
+                "-T", "sdv_model",
+                "-N", "sdv_model",
+                "-l", "${input:languageId}",
+                "-I", "./vehicle_signal_specification/spec",
                 "./vehicle_signal_specification/spec/VehicleSignalSpecification.vspec"
             ]
         }

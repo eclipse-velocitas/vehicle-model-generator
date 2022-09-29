@@ -125,8 +125,8 @@ class VehicleModelPythonGenerator:
     def __write_collections(self):
         self.ctx.write(self.ctx.line_break)
         for collection in self.collections:
-            for lines in collection.content_list:
-                self.ctx.write(f"{lines}\n")
+            self.ctx.write(collection.ctx.get_content())
+            self.ctx.write(self.ctx.line_break)
 
         self.collections.clear()
 

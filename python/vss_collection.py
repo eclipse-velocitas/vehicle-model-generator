@@ -53,7 +53,7 @@ class VssCollection:
         """Construct of new collection object."""
         self.ctx = CodeGeneratorContext()
         self.name = f"{node.name}{_COLLECTION_SUFFIX}"
-        self.content_list = self.__gen_collection(node)
+        self.__gen_collection(node)
 
     def __parse_instances(self, reg_ex, instance) -> VssInstance:
         result = list()
@@ -81,53 +81,48 @@ class VssCollection:
 
         raise ValueError("", "", f"is of type {type(instance)} which is unsupported")
 
-    def __gen_collection_types(
-        self, name, type_name, vss_instance: VssInstance
-    ) -> list:
-        result = list()
+    def __gen_collection_types(self, name, type_name, vss_instance: VssInstance):
         print(f"{' ' * 5}- {type_name:25}{vss_instance.content}")
-        result.append(f"{self.ctx.tab}class {type_name}(Model):")
-        result.append(f"{self.ctx.tab * 2}def __init__(self, name, parent):")
-        result.append(f"{self.ctx.tab * 3}super().__init__(parent)")
-        result.append(f"{self.ctx.tab * 3}self.name = name")
+        self.ctx.dedent()
+        self.ctx.write(self.ctx.line_break)
+        self.ctx.write(f"class {type_name}(Model):\n")
+        self.ctx.indent()
+        self.ctx.write("def __init__(self, name, parent):\n")
+        self.ctx.indent()
+        self.ctx.write("super().__init__(parent)\n")
+        self.ctx.write("self.name = name\n")
 
         for instance in vss_instance.content:
-            result.append(
-                f'{self.ctx.tab * 3}self.{instance} = {name}("{instance}", self)'
-            )
+            self.ctx.write(f'self.{instance} = {name}("{instance}", self)\n')
 
-        return result
-
-    def __gen_getter(self, name, instances, indent_level) -> List[str]:
-        result = list()
+    def __gen_getter(self, name, instances):
         count = len(instances)
-        result.append(f"\n{self.ctx.tab * indent_level}def {name}(self, index: int):")
-        result.append(
-            f"{self.ctx.tab * (indent_level + 1)}if index < 1 or index > {count}:"
-        )
-        result.append(
-            f'{self.ctx.tab * (indent_level + 2)}raise IndexError(f"Index {{index}} is out of range")'
-        )
+        self.ctx.dedent()
+        self.ctx.write(self.ctx.line_break)
+        self.ctx.write(f"def {name}(self, index: int):\n")
+        self.ctx.indent()
+        self.ctx.write(f"if index < 1 or index > {count}:\n")
+        self.ctx.indent()
+        self.ctx.write(f'raise IndexError(f"Index {{index}} is out of range")\n')
+        self.ctx.dedent()
+        self.ctx.write(f"_options = {{\n")
+        self.ctx.indent()
 
-        result.append(f"{self.ctx.tab * (indent_level + 1)}_options = {{")
         for i in range(len(instances)):
-            result.append(
-                f"{self.ctx.tab * (indent_level + 2)}{i + 1} : self.{instances[i]},"
-            )
-        result.append(f"{self.ctx.tab * (indent_level + 1)}}}")
+            self.ctx.write(f"{i + 1}: self.{instances[i]},\n")
 
-        result.append(
-            f"{self.ctx.tab * (indent_level + 1)}return _options.get(index)\n"
-        )
-        return result
+        self.ctx.dedent()
+        self.ctx.write("}\n")
+        self.ctx.write("return _options.get(index)")
 
-    def __gen_collection(self, node: VSSNode) -> List[str]:
+    def __gen_collection(self, node: VSSNode):
         print(f"- {self.name:30}{node.instances}")
-        result = list()
-        result.append(f"class {self.name}(Model):")
-        result.append(f"{self.ctx.tab}def __init__(self, name, parent):")
-        result.append(f"{self.ctx.tab * 2}super().__init__(parent)")
-        result.append(f"{self.ctx.tab * 2}self.name = name")
+        self.ctx.write(f"class {self.name}(Model):\n")
+        self.ctx.indent()
+        self.ctx.write("def __init__(self, name, parent):\n")
+        self.ctx.indent()
+        self.ctx.write("super().__init__(parent)\n")
+        self.ctx.write("self.name = name\n")
 
         complex_list = False
         for instance in node.instances:
@@ -159,30 +154,23 @@ class VssCollection:
         # check if self needs to be added due to the internal type.
         prefix = "self." if has_inner_types else ""
         for instance in instance_list:
-            result.append(
-                f'{self.ctx.tab * 2}self.{instance} = {prefix}{instance_type}("{instance}", self)'
+            self.ctx.write(
+                f'self.{instance} = {prefix}{instance_type}("{instance}", self)\n'
             )
+
         # add getter
-        result.extend(self.__gen_getter(vss_instance.name, instance_list, 1))
+        self.__gen_getter(vss_instance.name, instance_list)
 
         # Parse Inner types
         if has_inner_types:
+            self.ctx.write(self.ctx.line_break)
             # add inner types
             inner_instances = self.__parse_instances(
                 _COLLECTION_REG_EX, node.instances[1]
             )
-            inner_types = self.__gen_collection_types(
-                node.name, instance_type, inner_instances
-            )
-            result.extend(inner_types)
+            self.__gen_collection_types(node.name, instance_type, inner_instances)
             # add getter
             if inner_instances.is_range:
-                result.extend(
-                    self.__gen_getter(inner_instances.name, inner_instances.content, 2)
-                )
+                self.__gen_getter(inner_instances.name, inner_instances.content)
             else:
-                result.extend(
-                    self.__gen_getter(_DEFAULT_RANGE_NAME, inner_instances.content, 2)
-                )
-
-        return result
+                self.__gen_getter(_DEFAULT_RANGE_NAME, inner_instances.content)
