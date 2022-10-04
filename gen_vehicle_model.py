@@ -17,7 +17,6 @@
 """Convert all vspec input files to Velocitas Python Vehicle Model."""
 
 import argparse
-import os
 import sys
 
 import vspec

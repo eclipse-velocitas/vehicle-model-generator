@@ -202,7 +202,8 @@ class VehicleModelPythonGenerator:
                 VSSType.ACTUATOR.value,
             ):
                 self.ctx.write(
-                    f"self.{child.name} = DataPoint{self.__get_datatype(child.datatype.value)}"
+                    f"self.{child.name} = \
+                        DataPoint{self.__get_datatype(child.datatype.value)}"
                     f'("{child.name}", self)\n'
                 )
                 self.model_imports.add(

@@ -213,7 +213,8 @@ class VehicleModelCppGenerator:
                         return_scope.write(f"return {range_name}{v};\n")
                     method_scope.write("}\n")
                 method_scope.write(
-                    f'throw std::runtime_error("Given value is outside of allowed range [{min_value};{max_value}]!");\n'
+                    f'throw std::runtime_error("Given value is outside of allowed range\
+                        [{min_value};{max_value}]!");\n'
                 )
                 self.external_includes.add("stdexcept")
             method_context.write("}\n")
@@ -223,9 +224,13 @@ class VehicleModelCppGenerator:
 
         # generate class code
         class_code_context = CodeGeneratorContext()
-        class_code_context.write(f"class {class_name} : public ParentClass {{\n")
+        class_code_context.write(
+            f"class {class_name} : \
+                                 public ParentClass {{\n"
+        )
 
-        # one indentation is lost after the first line when using replace, that`s why we add an additional one for nested classes
+        # one indentation is lost after the first line when using replace,
+        # that`s why we add an additional one for nested classes
         if class_name.endswith("Type"):
             class_code_context.indent()
 
@@ -276,7 +281,8 @@ class VehicleModelCppGenerator:
         return "\n\n".join(collection_types)
 
     def __gen_model(self, node: VSSNode, path: str, is_root=False):
-        # must be done before generating the imports, since it is adding imports to the list
+        # must be done before generating the imports, since it is adding imports
+        # to the list
         collection_types = self.__gen_collection_types(node, path)
 
         self.__gen_header(node)
@@ -317,7 +323,8 @@ class VehicleModelCppGenerator:
 
                 if child.type.value in ("attribute", "sensor", "actuator"):
                     header_public.write(
-                        f"DataPoint{self.__get_data_type(child.datatype.value)} {child.name};\n\n"
+                        f"DataPoint{self.__get_data_type(child.datatype.value)} \
+                            {child.name};\n\n"
                     )
                     member += ",\n\t\t" + f'{child.name}("{child.name}", this)'
 
