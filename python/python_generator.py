@@ -15,12 +15,13 @@
 """VehicleModelPythonGenerator."""
 
 import os
-import re
 import shutil
-from typing import Set
+from typing import List, Set
 
+from vspec.model.constants import VSSType
 from vspec.model.vsstree import VSSNode
 
+from python.vss_collection import VssCollection
 from utils import CodeGeneratorContext
 
 
@@ -39,6 +40,7 @@ class VehicleModelPythonGenerator:
         self.ctx = CodeGeneratorContext()
         self.imports: Set[str] = set()
         self.model_imports: Set[str] = set()
+        self.collections: List[VssCollection] = list()
 
     def generate(self):
         """Generate python code for vehicle model."""
@@ -79,7 +81,7 @@ class VehicleModelPythonGenerator:
         for child in node.children:
             child_path = os.path.join(path, child.name)
 
-            if child.type.value == "branch":
+            if child.type.value == VSSType.BRANCH.value:
                 if not os.path.exists(child_path):
                     os.makedirs(child_path)
                 self.__gen_model(child, child_path)
@@ -120,13 +122,20 @@ class VehicleModelPythonGenerator:
         self.imports.clear()
         self.model_imports.clear()
 
+    def __write_collections(self):
+        for collection in self.collections:
+            self.ctx.write(collection.ctx.get_content())
+            self.ctx.write(self.ctx.line_break)
+
+        self.collections.clear()
+
     def __gen_model_docstring(self, node: VSSNode):
         self.ctx.write(f'"""{node.name} model.')
         if node.children:
             self.ctx.write("\n\nAttributes\n")
             self.ctx.write("----------\n")
             for i in node.children:
-                if i.type.value == "attribute":
+                if i.type.value == VSSType.ATTRIBUTE.value:
                     self.ctx.write(f"{i.name}: {i.type.value} ({i.datatype.value})\n")
                 else:
                     self.ctx.write(f"{i.name}: {i.type.value}\n")
@@ -155,9 +164,9 @@ class VehicleModelPythonGenerator:
         self.__gen_model_docstring(node)
 
         if is_root:
-            self.ctx.write("def __init__(self):\n")
+            self.ctx.write("def __init__(self, name):\n")
         else:
-            self.ctx.write("def __init__(self, parent):\n")
+            self.ctx.write("def __init__(self, name, parent):\n")
         self.ctx.indent()
         self.ctx.write(f'"""Create a new {node.name} model."""\n')
         if is_root:
@@ -165,11 +174,33 @@ class VehicleModelPythonGenerator:
         else:
             self.ctx.write("super().__init__(parent)\n")
 
+        self.ctx.write("self.name = name\n")
+
         if node.children:
             self.ctx.write("\n")
 
         for child in node.children:
-            if child.type.value in ("attribute", "sensor", "actuator"):
+            # Check if branch, add class members
+            if child.type.value == VSSType.BRANCH.value:
+                # if has instances, a collection will be created
+                if child.instances:
+                    collection = VssCollection(child)
+                    self.collections.append(collection)
+                    self.ctx.write(
+                        f'self.{child.name} = {collection.name}("{child.name}", self)\n'
+                    )
+                else:
+                    # add simple branch member
+                    self.ctx.write(
+                        f'self.{child.name} = {child.name}("{child.name}", self)\n'
+                    )
+                self.imports.add(f"{path}/{child.name}")
+            # else (ATTRIBUTE, SENSOR, ACTUATOR)
+            elif child.type.value in (
+                VSSType.ATTRIBUTE.value,
+                VSSType.SENSOR.value,
+                VSSType.ACTUATOR.value,
+            ):
                 self.ctx.write(
                     f"self.{child.name} = \
                         DataPoint{self.__get_datatype(child.datatype.value)}"
@@ -178,24 +209,14 @@ class VehicleModelPythonGenerator:
                 self.model_imports.add(
                     f"DataPoint{self.__get_datatype(child.datatype.value)}"
                 )
-            if child.type.value == "branch":
-                if child.instances:
-                    instances = self.__gen_instances(child)
-                    inst_repr = ", ".join(instances)
-                    self.ctx.write(
-                        f"self.{child.name} = ModelCollection[{child.name}]"
-                        f"([{inst_repr}], {child.name}(self))\n"
-                    )
-                    self.model_imports.add("ModelCollection")
-                else:
-                    self.ctx.write(f"self.{child.name} = {child.name}(self)\n")
-                self.imports.add(f"{path}/{child.name}")
 
         self.ctx.dedent()
         self.ctx.dedent()
+
+        self.__write_collections()
 
         if is_root:
-            self.ctx.write("\n\nvehicle = Vehicle()\n")
+            self.ctx.write('\n\nvehicle = Vehicle("Vehicle")\n')
 
         self.ctx.set_position(0)
         self.__gen_header(node)
@@ -205,48 +226,6 @@ class VehicleModelPythonGenerator:
             file.write(self.ctx.get_content())
 
         self.ctx.reset()
-
-    def __gen_instances(self, node: VSSNode):
-        instances = node.instances
-
-        reg_ex = r"\w+\[\d+,(\d+)\]"
-
-        result = []
-
-        complex_list = False
-        for i in instances:
-            if isinstance(i, list) or re.match(reg_ex, i):
-                complex_list = True
-
-        if complex_list:
-            for i in instances:
-                result.append(self.__parse_instances(reg_ex, i))
-        else:
-            result.append(self.__parse_instances(reg_ex, instances))
-
-        return result
-
-    def __parse_instances(self, reg_ex, i):
-
-        # parse string instantiation elements (e.g. Row[1,5])
-        if isinstance(i, str):
-            if re.match(reg_ex, i):
-                inst_range_arr = re.split(r"\[+|,+|\]", i)
-                range_name = inst_range_arr[0]
-                lower_bound = int(inst_range_arr[1])
-                upper_bound = int(inst_range_arr[2])
-                self.model_imports.add("NamedRange")
-                return f'NamedRange("{range_name}", {lower_bound}, {upper_bound})'
-
-            raise ValueError("", "", "instantiation type not supported")
-
-        # Use list elements for instances (e.g. ["LEFT","RIGHT"])
-        if isinstance(i, list):
-            items = '", "'.join(i)
-            self.model_imports.add("Dictionary")
-            return f'Dictionary(["{items}"])'
-
-        raise ValueError("", "", f"is of type {type(i)} which is unsupported")
 
     def __get_datatype(self, datatype):
         if datatype[-1] == "]":

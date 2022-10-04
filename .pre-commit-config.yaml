@@ -78,7 +78,7 @@ repos:
     hooks:
       - id: mypy
         args:
-          ["--exclude=(vehicle_model|vehicle_signal_specification|proto)", "."]
+          ["--exclude=(sdv_model|vehicle_signal_specification|proto)", "."]
         language: system
         pass_filenames: false
 
