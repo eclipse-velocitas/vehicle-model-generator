@@ -123,7 +123,6 @@ class VehicleModelPythonGenerator:
         self.model_imports.clear()
 
     def __write_collections(self):
-        self.ctx.write(self.ctx.line_break)
         for collection in self.collections:
             self.ctx.write(collection.ctx.get_content())
             self.ctx.write(self.ctx.line_break)

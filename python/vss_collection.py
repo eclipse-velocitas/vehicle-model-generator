@@ -55,6 +55,117 @@ class VssCollection:
         self.name = f"{node.name}{_COLLECTION_SUFFIX}"
         self.__gen_collection(node)
 
+    def __gen_collection(self, node: VSSNode):
+        print(f"- {self.name:30}{node.instances}")
+        self.ctx.write(self.ctx.line_break)
+        self.ctx.write(f"class {self.name}(Model):\n")
+        with self.ctx as def_ctx:
+            def_ctx.write("def __init__(self, name, parent):\n")
+            with def_ctx as body_ctx:
+                body_ctx.write("super().__init__(parent)\n")
+                body_ctx.write("self.name = name\n")
+
+                complex_list = False
+                for instance in node.instances:
+                    if isinstance(instance, list) or re.match(
+                        _COLLECTION_REG_EX, instance
+                    ):
+                        complex_list = True
+
+                vss_instance = None
+                instance_list_len = len(node.instances)
+                instance_type = f"{node.name}"
+                has_inner_types = False
+                if complex_list:
+                    # Complex Instances collection
+                    vss_instance = self.__parse_instances(
+                        _COLLECTION_REG_EX, node.instances[0]
+                    )
+
+                    # if instance_list_len = 1:
+                    #   -> Flat instance type (list of single instance type). E.g ['Sensor[1,8]']
+                    # if instance_list_len > 1
+                    #   -> Multi-level (nested) instance type. E.g ['Row[1,2]', ['Left', 'Right']]
+                    if instance_list_len > 1:
+                        instance_type = f"{vss_instance.name}{_TYPE_SUFFIX}"
+                        has_inner_types = True
+
+                else:
+                    # Simple instance type (list object). E.g. Row[1,4] or ['Low', 'High']
+                    vss_instance = self.__parse_instances(
+                        _COLLECTION_REG_EX, node.instances
+                    )
+
+                instance_list = vss_instance.content
+
+                # check if self needs to be added due to the internal type.
+                prefix = "self." if has_inner_types else ""
+                for instance in instance_list:
+                    body_ctx.write(
+                        f'self.{instance} = {prefix}{instance_type}("{instance}", self)\n'
+                    )
+
+        with self.ctx as getter_ctx:
+            # add getter
+            self.__gen_getter(vss_instance.name, instance_list, getter_ctx)
+
+        # Parse inner types
+        if has_inner_types:
+            self.ctx.write(self.ctx.line_break)
+            # add inner types
+            inner_instances = self.__parse_instances(
+                _COLLECTION_REG_EX, node.instances[1]
+            )
+            self.__gen_collection_types(node.name, instance_type, inner_instances)
+            # add getter
+            self.ctx.indent()
+            with self.ctx as getter_ctx:
+                if inner_instances.is_range:
+                    self.__gen_getter(
+                        inner_instances.name, inner_instances.content, getter_ctx
+                    )
+                else:
+                    self.__gen_getter(
+                        _DEFAULT_RANGE_NAME, inner_instances.content, getter_ctx
+                    )
+
+    def __gen_collection_types(self, name, type_name, vss_instance: VssInstance):
+        print(f"{' ' * 5}- {type_name:25}{vss_instance.content}")
+        with self.ctx as type_ctx:
+            type_ctx.write(self.ctx.line_break)
+            type_ctx.write(f"class {type_name}(Model):\n")
+            with type_ctx as def_ctx:
+                def_ctx.write("def __init__(self, name, parent):\n")
+                with def_ctx as body_ctx:
+                    body_ctx.write("super().__init__(parent)\n")
+                    body_ctx.write("self.name = name\n")
+
+                    for instance in vss_instance.content:
+                        body_ctx.write(
+                            f'self.{instance} = {name}("{instance}", self)\n'
+                        )
+
+    def __gen_getter(self, name, instances, base_ctx):
+        count = len(instances)
+        base_ctx.write(base_ctx.line_break)
+        base_ctx.write(f"def {name}(self, index: int):\n")
+        with base_ctx as body_ctx:
+            body_ctx.write(f"if index < 1 or index > {count}:\n")
+            body_ctx.indent()
+            body_ctx.write(
+                f'raise IndexError(f"Index {{index}} is out of range [1, {count}]")\n'
+            )
+            body_ctx.dedent()
+            body_ctx.write(f"_options = {{\n")
+            body_ctx.indent()
+
+            for index in range(len(instances)):
+                base_ctx.write(f"{index + 1}: self.{instances[index]},\n")
+
+            body_ctx.dedent()
+            body_ctx.write("}\n")
+            body_ctx.write("return _options.get(index)")
+
     def __parse_instances(self, reg_ex, instance) -> VssInstance:
         result = list()
 
@@ -80,97 +191,3 @@ class VssCollection:
             return VssInstance(range_name, result, False)
 
         raise ValueError("", "", f"is of type {type(instance)} which is unsupported")
-
-    def __gen_collection_types(self, name, type_name, vss_instance: VssInstance):
-        print(f"{' ' * 5}- {type_name:25}{vss_instance.content}")
-        self.ctx.dedent()
-        self.ctx.write(self.ctx.line_break)
-        self.ctx.write(f"class {type_name}(Model):\n")
-        self.ctx.indent()
-        self.ctx.write("def __init__(self, name, parent):\n")
-        self.ctx.indent()
-        self.ctx.write("super().__init__(parent)\n")
-        self.ctx.write("self.name = name\n")
-
-        for instance in vss_instance.content:
-            self.ctx.write(f'self.{instance} = {name}("{instance}", self)\n')
-
-    def __gen_getter(self, name, instances):
-        count = len(instances)
-        self.ctx.dedent()
-        self.ctx.write(self.ctx.line_break)
-        self.ctx.write(f"def {name}(self, index: int):\n")
-        self.ctx.indent()
-        self.ctx.write(f"if index < 1 or index > {count}:\n")
-        self.ctx.indent()
-        self.ctx.write(f'raise IndexError(f"Index {{index}} is out of range")\n')
-        self.ctx.dedent()
-        self.ctx.write(f"_options = {{\n")
-        self.ctx.indent()
-
-        for i in range(len(instances)):
-            self.ctx.write(f"{i + 1}: self.{instances[i]},\n")
-
-        self.ctx.dedent()
-        self.ctx.write("}\n")
-        self.ctx.write("return _options.get(index)")
-
-    def __gen_collection(self, node: VSSNode):
-        print(f"- {self.name:30}{node.instances}")
-        self.ctx.write(f"class {self.name}(Model):\n")
-        self.ctx.indent()
-        self.ctx.write("def __init__(self, name, parent):\n")
-        self.ctx.indent()
-        self.ctx.write("super().__init__(parent)\n")
-        self.ctx.write("self.name = name\n")
-
-        complex_list = False
-        for instance in node.instances:
-            if isinstance(instance, list) or re.match(_COLLECTION_REG_EX, instance):
-                complex_list = True
-
-        vss_instance = None
-        instance_list_len = len(node.instances)
-        instance_type = f"{node.name}"
-        has_inner_types = False
-        if complex_list:
-            # Complex Instances collection
-            vss_instance = self.__parse_instances(_COLLECTION_REG_EX, node.instances[0])
-
-            # if instance_list_len = 1:
-            #   -> Flat instance type (list of single instance type). E.g ['Sensor[1,8]']
-            # if instance_list_len > 1
-            #   -> Multi-level (nested) instance type. E.g ['Row[1,2]', ['Left', 'Right']]
-            if instance_list_len > 1:
-                instance_type = f"{vss_instance.name}{_TYPE_SUFFIX}"
-                has_inner_types = True
-
-        else:
-            # Simple instance type (list object). E.g. Row[1,4] or ['Low', 'High']
-            vss_instance = self.__parse_instances(_COLLECTION_REG_EX, node.instances)
-
-        instance_list = vss_instance.content
-
-        # check if self needs to be added due to the internal type.
-        prefix = "self." if has_inner_types else ""
-        for instance in instance_list:
-            self.ctx.write(
-                f'self.{instance} = {prefix}{instance_type}("{instance}", self)\n'
-            )
-
-        # add getter
-        self.__gen_getter(vss_instance.name, instance_list)
-
-        # Parse Inner types
-        if has_inner_types:
-            self.ctx.write(self.ctx.line_break)
-            # add inner types
-            inner_instances = self.__parse_instances(
-                _COLLECTION_REG_EX, node.instances[1]
-            )
-            self.__gen_collection_types(node.name, instance_type, inner_instances)
-            # add getter
-            if inner_instances.is_range:
-                self.__gen_getter(inner_instances.name, inner_instances.content)
-            else:
-                self.__gen_getter(_DEFAULT_RANGE_NAME, inner_instances.content)
