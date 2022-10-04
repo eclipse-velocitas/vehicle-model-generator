@@ -9,7 +9,7 @@
 |deprecation|2.1.0|Apache 2.0|
 |distlib|0.3.6|Python Software Foundation License|
 |filelock|3.8.0|Public Domain|
-|identify|2.5.5|MIT|
+|identify|2.5.6|MIT|
 |iniconfig|1.1.1|MIT|
 |isodate|0.6.1|BSD|
 |nodeenv|1.7.0|BSD|
