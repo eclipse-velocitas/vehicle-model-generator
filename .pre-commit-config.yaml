@@ -96,7 +96,7 @@ repos:
     rev: v1.1.13
     hooks:
       - id: insert-license
-        files: '.*\.(py|pyi|yaml|yml|sh|helmignore|dockerignore|gitignore|Dockerfile.*)$'
+        files: '.*\.(py|pyi|yaml|yml|sh|helmignore|dockerignore|gitignore|Dockerfile)$'
         args:
           - --license-filepath
           - license_header.txt

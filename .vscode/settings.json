@@ -15,7 +15,6 @@
     "./tests/"
   ],
   "mypy.runUsingActiveInterpreter": true,
-  "pre-commit-helper.runOnSave": "all hooks",
   "python.linting.banditArgs": [
     "-c setup.cfg"
   ],

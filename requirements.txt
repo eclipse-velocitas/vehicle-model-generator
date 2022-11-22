@@ -4,4 +4,10 @@ deprecation>=2.1.0
 pytest>=2.7.2
 PyYAML>=5.1
 rdflib>=6.0.0
-pre-commit>=2.19.0
+pre-commit
+pydocstyle
+black
+pylint
+mypy
+bandit
+flake8
