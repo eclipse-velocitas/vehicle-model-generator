@@ -16,13 +16,14 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
 // https://github.com/microsoft/vscode-dev-containers/tree/v0.194.3/containers/dapr-javascript-node
 {
-	"name": "Python VehicleApp",
-	"dockerFile": "Dockerfile${localEnv:DEVCONTAINER_PROXY}",
+	"name": "Vehicle Model Generator",
 	"build": {
-		"args": {
-			"PROXY_PORT": "${localEnv:DEVCONTAINER_PROXY_PORT}"
-		}
+		"dockerfile": "Dockerfile"
 	},
+	"runArgs": [
+		"--init",
+		"--privileged"
+	],
 	"settings": {
 		"python.pythonPath": "/usr/bin/python3",
 		"python.defaultInterpreterPath": "/usr/bin/python3",
@@ -32,35 +33,23 @@
 		"python.formatting.provider": "black",
 		"python.linting.banditEnabled": true,
 		"python.linting.flake8Enabled": true,
-		"python.disableInstallationCheck": true
-	},
-	"features": {
-		"common": {
-			"username": "automatic",
-			"uid": "automatic",
-			"gid": "automatic",
-			"installZsh": true,
-			"installOhMyZsh": true,
-			"upgradePackages": true,
-			"nonFreePackages": false
+		"python.disableInstallationCheck": true,
+		"terminal.integrated.defaultProfile.linux": "zsh",
+		"terminal.integrated.profiles.linux": {
+			"zsh": {
+				"path": "/usr/bin/zsh"
+			}
 		}
 	},
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
-		"dbaeumer.vscode-eslint",
-		"ms-azuretools.vscode-docker",
-		"ms-vscode.vscode-typescript-tslint-plugin",
 		"ms-python.python",
-		"cschleiden.vscode-github-actions",
-		"ms-vsliveshare.vsliveshare-pack",
 		"dotjoshjohnson.xml",
 		"matangover.mypy",
-		"elagil.pre-commit-helper",
 		"ms-python.isort"
 	],
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
-	// Ensure Dapr is running on opening the container
 	"onCreateCommand": "bash .devcontainer/scripts/postCreateCommand.sh",
 	// Comment out connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
 	"remoteUser": "vscode"
