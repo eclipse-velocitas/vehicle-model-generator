@@ -17,7 +17,7 @@ FROM ubuntu:20.04
 ENV DOCKER_BUILDKIT=1
 
 # Fix for bug in devcontainer features
-ADD https://raw.githubusercontent.com/devcontainers/features/main/src/common-utils/install.sh /tmp/scripts/install-common.sh
+ADD https://raw.githubusercontent.com/devcontainers/features/7fa90110d762797cc0b1c2fe8fcc028c9b813d56/src/common-utils/install.sh /tmp/scripts/install-common.sh
 RUN UID="4000" bash /tmp/scripts/install-common.sh
 
 COPY scripts/*.sh /tmp/scripts/
