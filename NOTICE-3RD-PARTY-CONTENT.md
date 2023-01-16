@@ -18,7 +18,7 @@
 |flake8|6.0.0|MIT|
 |gitdb|4.0.10|BSD|
 |GitPython|3.1.30|BSD|
-|identify|2.5.12|MIT|
+|identify|2.5.13|MIT|
 |iniconfig|2.0.0|MIT|
 |isodate|0.6.1|BSD|
 |isort|5.11.4|MIT|
@@ -38,7 +38,7 @@
 |pyflakes|3.0.1|MIT|
 |pylint|2.15.10|GNU General Public License v2 (GPLv2)|
 |pyparsing|3.0.9|MIT|
-|pytest|7.2.0|MIT|
+|pytest|7.2.1|MIT|
 |PyYAML|6.0|MIT|
 |rdflib|6.2.0|New BSD|
 |setuptools|58.1.0|MIT|
