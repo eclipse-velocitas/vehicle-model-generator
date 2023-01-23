@@ -266,7 +266,7 @@ class VehicleModelCppGenerator:
 
                 if child.instances:
                     instances = [
-                        (f"{child.name}Collection", None)
+                        (f"{child.name}Collection", [])
                     ] + self.__gen_instances(child)
                     generated_classes = []
 
