@@ -18,8 +18,11 @@ python3 gen_vehicle_model.py -I <path_to_dir_with_included_vspec_files> <path_to
 
 ### Example
 ```bash
+git clone https://github.com/COVESA/vehicle_signal_specification.git
 python3 gen_vehicle_model.py -I ./vehicle_signal_specification/spec ./vehicle_signal_specification/spec/VehicleSignalSpecification.vspec
 ```
+
+Or use VSCode Tasks: Press ```F5```, select ```Python``` or ```cpp```.
 
 ## Arguments
 
