@@ -22,3 +22,7 @@ echo "#######################################################"
 
 pip3 install -r ./requirements.txt
 pip3 install -r ./requirements-vss.txt
+
+# add repo to git safe.directory
+REPO=$(pwd)
+git config --global --add safe.directory $REPO
