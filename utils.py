@@ -13,6 +13,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 """CodeGeneratorContext."""
+from typing import Optional
 
 
 class CodeGeneratorContext:
@@ -52,7 +53,7 @@ class CodeGeneratorContext:
     def write(
         self,
         text: str,
-        index: int = None,
+        index: Optional[int] = None,
         strip_lines: bool = False,
         replace_char: str = "|",
         ignore_initial_line=False,

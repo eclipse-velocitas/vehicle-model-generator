@@ -36,7 +36,6 @@
 |pycodestyle|2.10.0|MIT|
 |pydocstyle|6.2.3|MIT|
 |pyflakes|3.0.1|MIT|
-|pylint|2.15.10|GNU General Public License v2 (GPLv2)|
 |pyparsing|3.0.9|MIT|
 |pytest|7.2.1|MIT|
 |PyYAML|6.0|MIT|

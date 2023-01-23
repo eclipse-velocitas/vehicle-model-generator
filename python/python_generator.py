@@ -18,8 +18,9 @@ import os
 import shutil
 from typing import List, Set
 
-from vspec.model.constants import VSSType
-from vspec.model.vsstree import VSSNode
+# Until vsspec issue will be fixed: https://github.com/COVESA/vss-tools/issues/208
+from vspec.model.constants import VSSType  # type: ignore
+from vspec.model.vsstree import VSSNode  # type: ignore
 
 from python.vss_collection import VssCollection
 from utils import CodeGeneratorContext
@@ -40,7 +41,7 @@ class VehicleModelPythonGenerator:
         self.ctx = CodeGeneratorContext()
         self.imports: Set[str] = set()
         self.model_imports: Set[str] = set()
-        self.collections: List[VssCollection] = list()
+        self.collections: List[VssCollection] = []
 
     def generate(self):
         """Generate python code for vehicle model."""

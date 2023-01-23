@@ -19,8 +19,9 @@ import re
 import shutil
 from typing import Set
 
-from vspec.model.constants import VSSType
-from vspec.model.vsstree import VSSNode
+# Until vsspec issue will be fixed: https://github.com/COVESA/vss-tools/issues/208
+from vspec.model.constants import VSSType  # type: ignore
+from vspec.model.vsstree import VSSNode  # type: ignore
 
 from utils import CodeGeneratorContext
 
@@ -101,8 +102,8 @@ class VehicleModelCppGenerator:
         self.ctx_header.write(f"#endif // {self.__generate_guard_name(node)}\n")
 
     def __gen_imports(self, node: VSSNode):
-        self.ctx_header.write(f'#include "sdk/DataPoint.h"\n')
-        self.ctx_header.write(f'#include "sdk/Model.h"\n')
+        self.ctx_header.write('#include "sdk/DataPoint.h"\n')
+        self.ctx_header.write('#include "sdk/Model.h"\n')
         self.ctx_header.write("\n")
 
         for imp in sorted(self.includes):
@@ -172,8 +173,10 @@ class VehicleModelCppGenerator:
 
         ctor_params = ""
         ctor_initializer_list = []
+        ctor_initializer_str = ""
         method_list = []
         member_list = []
+        member_list_str = ""
         class_name = ""
 
         if name.endswith("Collection"):
@@ -191,18 +194,18 @@ class VehicleModelCppGenerator:
             self.external_includes.add("stdexcept")
 
         if nested_name == "Choice":
-            for v in nested_values:
-                ctor_initializer_list.append(f'{v}("{v}", this)')
-                member_list.append(f"{nested_type} {v}")
+            for value in nested_values:
+                ctor_initializer_list.append(f'{value}("{value}", this)')
+                member_list.append(f"{nested_type} {value}")
         elif nested_name == "NamedRange":
             range_name = nested_values[0]
             min_value = nested_values[1]
             max_value = nested_values[2]
-            for v in range(min_value, max_value + 1):
+            for value in range(min_value, max_value + 1):
                 ctor_initializer_list.append(
-                    f'{range_name}{v}("{range_name}{v}", this)'
+                    f'{range_name}{value}("{range_name}{value}", this)'
                 )
-                member_list.append(f"{nested_type} {range_name}{v}")
+                member_list.append(f"{nested_type} {range_name}{value}")
 
             method_context = CodeGeneratorContext()
             method_context.write(f"{nested_type}& {range_name}(int index) {{\n")
@@ -220,7 +223,7 @@ class VehicleModelCppGenerator:
             method_context.write("}\n")
             method_list.append(method_context.get_content())
 
-        ctor_initializer_list = ",\n".join(ctor_initializer_list)
+        ctor_initializer_str = ",\n".join(ctor_initializer_list)
 
         # generate class code
         class_code_context = CodeGeneratorContext()
@@ -240,17 +243,17 @@ class VehicleModelCppGenerator:
             if name.endswith("Collection"):
                 public_scope.write("%NESTED_CLASSES%\n")
             public_scope.write(f"{class_name}({ctor_params})")
-            if len(ctor_initializer_list) > 0:
+            if len(ctor_initializer_str) > 0:
                 with public_scope as ctor_initializer_list_scope:
-                    ctor_initializer_list_scope.write(f":\n{ctor_initializer_list}\n")
+                    ctor_initializer_list_scope.write(f":\n{ctor_initializer_str}\n")
                 public_scope.write("{\n}\n\n")
 
             if len(method_list) > 0:
                 public_scope.write("\n\n".join(method_list))
                 public_scope.write("\n")
 
-            member_list = ";\n".join(member_list)
-            public_scope.write(f"{member_list}" + ";\n")
+            member_list_str = ";\n".join(member_list)
+            public_scope.write(f"{member_list_str}" + ";\n")
 
         class_code_context.write("};\n")
         return class_code_context.get_content()

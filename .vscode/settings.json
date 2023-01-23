@@ -1,8 +1,13 @@
 {
   "python.linting.banditEnabled": true,
   "python.linting.flake8Enabled": true,
-  "python.linting.pylintEnabled": true,
   "python.linting.mypyEnabled": true,
+  "python.linting.mypyArgs": [
+    "--follow-imports=silent",
+    "--ignore-missing-imports",
+    "--show-column-numbers",
+    "--no-pretty"
+  ],
   "python.linting.pydocstyleEnabled": true,
   "python.linting.enabled": true,
   "python.linting.flake8Args": [

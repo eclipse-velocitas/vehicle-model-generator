@@ -19,7 +19,8 @@
 import argparse
 import sys
 
-import vspec
+# Until vsspec issue will be fixed: https://github.com/COVESA/vss-tools/issues/208
+import vspec  # type: ignore
 
 from cpp.cpp_generator import VehicleModelCppGenerator
 from python.python_generator import VehicleModelPythonGenerator

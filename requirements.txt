@@ -7,7 +7,6 @@ rdflib>=6.0.0
 pre-commit
 pydocstyle
 black
-pylint
 mypy
 bandit
 flake8

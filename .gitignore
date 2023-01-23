@@ -144,6 +144,7 @@ dmypy.json
 
 # Generated vehicle model
 output/
+sdv_model/
 
 # VSS Submodule
 vehicle_signal_specification/

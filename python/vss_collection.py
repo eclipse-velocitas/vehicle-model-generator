@@ -17,7 +17,8 @@
 import re
 from typing import List
 
-from vspec.model.vsstree import VSSNode
+# Until vsspec issue will be fixed: https://github.com/COVESA/vss-tools/issues/208
+from vspec.model.vsstree import VSSNode  # type: ignore
 
 from utils import CodeGeneratorContext
 
@@ -83,15 +84,18 @@ class VssCollection:
                     )
 
                     # if instance_list_len = 1:
-                    #   -> Flat instance type (list of single instance type). E.g ['Sensor[1,8]']
+                    #   -> Flat instance type (list of single instance type).
+                    # # E.g ['Sensor[1,8]']
                     # if instance_list_len > 1
-                    #   -> Multi-level (nested) instance type. E.g ['Row[1,2]', ['Left', 'Right']]
+                    #   -> Multi-level (nested) instance type.
+                    # E.g ['Row[1,2]', ['Left', 'Right']]
                     if instance_list_len > 1:
                         instance_type = f"{vss_instance.name}{_TYPE_SUFFIX}"
                         has_inner_types = True
 
                 else:
-                    # Simple instance type (list object). E.g. Row[1,4] or ['Low', 'High']
+                    # Simple instance type (list object).
+                    # E.g. Row[1,4] or ['Low', 'High']
                     vss_instance = self.__parse_instances(
                         _COLLECTION_REG_EX, node.instances
                     )
@@ -100,9 +104,9 @@ class VssCollection:
 
                 # check if self needs to be added due to the internal type.
                 prefix = "self." if has_inner_types else ""
-                for instance in instance_list:
+                for inst in instance_list:
                     body_ctx.write(
-                        f'self.{instance} = {prefix}{instance_type}("{instance}", self)\n'
+                        f'self.{inst} = {prefix}{instance_type}("{inst}", self)\n'
                     )
 
         with self.ctx as getter_ctx:
@@ -156,7 +160,7 @@ class VssCollection:
                 f'raise IndexError(f"Index {{index}} is out of range [1, {count}]")\n'
             )
             body_ctx.dedent()
-            body_ctx.write(f"_options = {{\n")
+            body_ctx.write("_options = {{\n")
             body_ctx.indent()
 
             for index in range(len(instances)):
@@ -167,7 +171,7 @@ class VssCollection:
             body_ctx.write("return _options.get(index)")
 
     def __parse_instances(self, reg_ex, instance) -> VssInstance:
-        result = list()
+        result = []
 
         # parse string instantiation elements (e.g. Row[1,5])
         range_name = _DEFAULT_RANGE_NAME
