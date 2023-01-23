@@ -19,6 +19,7 @@
 |identify|2.5.13|MIT|
 |iniconfig|2.0.0|MIT|
 |isodate|0.6.1|BSD|
+|isort|5.11.4|MIT|
 |mccabe|0.7.0|MIT|
 |mypy|0.991|MIT|
 |mypy-extensions|0.4.3|MIT|
