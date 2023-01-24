@@ -27,7 +27,6 @@ https://www.eclipse.org/projects/handbook/#resources-commit
 * Use [pydocstyle](https://pydocstyle.readthedocs.io/) to check for PEP-8 style issues.
 * Use [mypy](https://mypy.readthedocs.io/) to check for type errors.
 * Use [flake8](https://flake8.readthedocs.io/) to check for style issues.
-* Use [pylint](https://pylint.readthedocs.io/) to check for code quality issues.
 * Above and other tools will run automatically if you install
  [pre-commit](https://pre-commit.com/) using the instructions below.
 
@@ -51,7 +50,6 @@ https://www.eclipse.org/projects/handbook/#resources-commit
 
 * Install and run [pre-commit](https://pre-commit.com/) to automatically check for style guide issues.
     ```bash
-    pre-commit install
     pre-commit run --all-files
     ```
 * Commit your changes into that branch.

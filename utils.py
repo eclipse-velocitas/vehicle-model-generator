@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Robert Bosch GmbH and Microsoft Corporation
+# Copyright (c) 2022-2023 Robert Bosch GmbH and Microsoft Corporation
 #
 # This program and the accompanying materials are made available under the
 # terms of the Apache License, Version 2.0 which is available at
@@ -13,6 +13,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 """CodeGeneratorContext."""
+from typing import Optional
 
 
 class CodeGeneratorContext:
@@ -52,7 +53,7 @@ class CodeGeneratorContext:
     def write(
         self,
         text: str,
-        index: int = None,
+        index: Optional[int] = None,
         strip_lines: bool = False,
         replace_char: str = "|",
         ignore_initial_line=False,

@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Robert Bosch GmbH and Microsoft Corporation
+# Copyright (c) 2022-2023 Robert Bosch GmbH and Microsoft Corporation
 #
 # This program and the accompanying materials are made available under the
 # terms of the Apache License, Version 2.0 which is available at
@@ -54,17 +54,7 @@ repos:
           )$
         additional_dependencies:
           - flake8-bugbear
-          - flake8-builtins
           - flake8-unused-arguments
-
-  - repo: local
-    hooks:
-      - id: pylint
-        name: pylint
-        entry: pylint
-        language: system
-        args: ["-rn", "-sn", "--rcfile=.pylintrc"]
-        types_or: [python]
 
   - repo: https://github.com/PyCQA/bandit
     rev: 1.7.1
@@ -93,7 +83,7 @@ repos:
       - id: helmlint
 
   - repo: https://github.com/Lucas-C/pre-commit-hooks
-    rev: v1.1.13
+    rev: v1.4.1
     hooks:
       - id: insert-license
         files: '.*\.(py|pyi|yaml|yml|sh|helmignore|dockerignore|gitignore|Dockerfile)$'
@@ -102,6 +92,7 @@ repos:
           - license_header.txt
           - --comment-style
           - "#"
+          - --use-current-year
       - id: insert-license
         files: '.*\.(proto)$'
         args:

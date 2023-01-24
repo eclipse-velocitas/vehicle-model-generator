@@ -1,5 +1,5 @@
 // ********************************************************************************
-// * Copyright (c) 2022 Robert Bosch GmbH and Microsoft Corporation
+// * Copyright (c) 2022-2023 Robert Bosch GmbH and Microsoft Corporation
 // *
 // * This program and the accompanying materials are made available under the
 // * terms of the Apache License, Version 2.0 which is available at
@@ -28,8 +28,6 @@
 		"python.pythonPath": "/usr/bin/python3",
 		"python.defaultInterpreterPath": "/usr/bin/python3",
 		"python.linting.enabled": true,
-		"python.linting.pylintEnabled": true,
-		"python.linting.pylintPath": "/usr/local/bin/pylint",
 		"python.formatting.provider": "black",
 		"python.linting.banditEnabled": true,
 		"python.linting.flake8Enabled": true,

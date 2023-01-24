@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Robert Bosch GmbH and Microsoft Corporation
+# Copyright (c) 2022-2023 Robert Bosch GmbH and Microsoft Corporation
 #
 # This program and the accompanying materials are made available under the
 # terms of the Apache License, Version 2.0 which is available at
@@ -18,8 +18,9 @@ import os
 import shutil
 from typing import List, Set
 
-from vspec.model.constants import VSSType
-from vspec.model.vsstree import VSSNode
+# Until vsspec issue will be fixed: https://github.com/COVESA/vss-tools/issues/208
+from vspec.model.constants import VSSType  # type: ignore
+from vspec.model.vsstree import VSSNode  # type: ignore
 
 from python.vss_collection import VssCollection
 from utils import CodeGeneratorContext
@@ -40,7 +41,7 @@ class VehicleModelPythonGenerator:
         self.ctx = CodeGeneratorContext()
         self.imports: Set[str] = set()
         self.model_imports: Set[str] = set()
-        self.collections: List[VssCollection] = list()
+        self.collections: List[VssCollection] = []
 
     def generate(self):
         """Generate python code for vehicle model."""

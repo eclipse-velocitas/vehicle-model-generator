@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (c) 2022 Robert Bosch GmbH and Microsoft Corporation
+# Copyright (c) 2022-2023 Robert Bosch GmbH and Microsoft Corporation
 #
 # This program and the accompanying materials are made available under the
 # terms of the Apache License, Version 2.0 which is available at
@@ -19,7 +19,8 @@
 import argparse
 import sys
 
-import vspec
+# Until vsspec issue will be fixed: https://github.com/COVESA/vss-tools/issues/208
+import vspec  # type: ignore
 
 from cpp.cpp_generator import VehicleModelCppGenerator
 from python.python_generator import VehicleModelPythonGenerator

@@ -21,7 +21,6 @@ SPDX-License-Identifier: Apache-2.0
 | Software   |                             License                                  |
 | :--------: | :------------------------------------------------------------------: |
 | Pre-Commit | https://github.com/pre-commit/pre-commit/blob/main/LICENSE           |
-| PyLint     | https://github.com/PyCQA/pylint/blob/main/LICENSE                    |
 | Mypy       | https://github.com/python/mypy/blob/master/LICENSE                   |
 | Black      | https://github.com/psf/black/blob/main/LICENSE                       |
 | Bandit     | https://github.com/PyCQA/bandit/blob/main/LICENSE                    |
