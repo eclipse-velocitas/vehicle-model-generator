@@ -50,7 +50,6 @@ https://www.eclipse.org/projects/handbook/#resources-commit
 
 * Install and run [pre-commit](https://pre-commit.com/) to automatically check for style guide issues.
     ```bash
-    pre-commit install
     pre-commit run --all-files
     ```
 * Commit your changes into that branch.
