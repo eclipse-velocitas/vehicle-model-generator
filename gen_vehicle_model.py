@@ -77,7 +77,7 @@ if __name__ == "__main__":
         metavar="overlays",
         type=str,
         default=[],
-        help="Add overlay that will be layered on top of the VSS file in the order they"
+        help="Add overlays that will be layered on top of the VSS file in the order they"
         " appear."
     )
     parser.add_argument(
@@ -85,8 +85,9 @@ if __name__ == "__main__":
         "--extended-attributes",
         type=str,
         default="",
-        help="Whitelisted extended attributes as comma separated list. Note, that not "
-        "all exporters will support (all) extended attributes."
+        help="Whitelisted extended attributes as comma separated list. Note, that "
+        "extended attributes aren't considered by the generator. This paramter is "
+        "only for suppressing warnings/errors."
     )
     parser.add_argument(
         "vspec_file",
