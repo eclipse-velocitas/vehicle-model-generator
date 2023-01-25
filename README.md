@@ -34,6 +34,8 @@ Or use VSCode Launch: Press ```F5```, select ```Python``` or ```cpp```.
 `-N PACKAGE_NAME`, `--package-name PACKAGE_NAME`                | Name of the module/package.
 `-s`, `--strict`                                    | Use strict checking: Terminate when anything not covered or not recommended by the core VSS specs is found.
 `-l {python}`, `--language {python}`                | The target language of the generated code.
+`-o OVERLAY_FILE`, `--overlays OVERLAY_FILE`        | Add overlays that will be layered on top of the VSS file in the order they appear.
+`-e EXTENDED_ATTRIBUTES`,<br>`--extended-attributes EXTENDED_ATTRIBUTES` | Whitelisted extended attributes as comma separated list. Note, that extended attributes aren't considered by the generator. This paramter is only for suppressing warnings/errors."
 
 ## Contribution
 - [GitHub Issues](https://github.com/eclipse-velocitas/vehicle-model-generator/issues)

@@ -71,6 +71,25 @@ if __name__ == "__main__":
         default="python",
     )
     parser.add_argument(
+        "-o",
+        "--overlays",
+        action="append",
+        metavar="overlays",
+        type=str,
+        default=[],
+        help="Add overlays that will be layered on top of the VSS file in the order they"
+        " appear."
+    )
+    parser.add_argument(
+        "-e",
+        "--extended-attributes",
+        type=str,
+        default="",
+        help="Whitelisted extended attributes as comma separated list. Note, that "
+        "extended attributes aren't considered by the generator. This paramter is "
+        "only for suppressing warnings/errors."
+    )
+    parser.add_argument(
         "vspec_file",
         metavar="<vspec_file>",
         help="The vehicle specification file to convert.",
@@ -85,16 +104,35 @@ if __name__ == "__main__":
 
     # yaml_out = open(args.yaml_file, "w", encoding="utf-8")
 
+    ext_attributes_list = args.extended_attributes.split(",")
+    if len(ext_attributes_list) > 0:
+        vspec.model.vsstree.VSSNode.whitelisted_extended_attributes = ext_attributes_list
+        print(
+            f"Known extended attributes: {', '.join(ext_attributes_list)}")
+
     try:
         print("Loading vspec...")
         tree = vspec.load_tree(
             args.vspec_file,
             include_dirs,
             merge_private=False,
-            break_on_unknown_attribute=True,
+            break_on_unknown_attribute=strict,
             break_on_name_style_violation=strict,
             expand_inst=False,
         )
+
+        for overlay in args.overlays:
+            print(f"Applying VSS overlay from {overlay}...")
+            overlay_tree = vspec.load_tree(
+                overlay,
+                include_dirs,
+                merge_private=False,
+                break_on_unknown_attribute=strict,
+                break_on_name_style_violation=strict,
+                expand_inst=False
+            )
+            vspec.merge_tree(tree, overlay_tree)
+
 
         if args.language == "python":
             print("Recursing tree and creating Python code...")
