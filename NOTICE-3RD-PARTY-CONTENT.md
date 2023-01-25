@@ -25,7 +25,7 @@
 |mypy-extensions|0.4.3|MIT|
 |nodeenv|1.7.0|BSD|
 |packaging|23.0|Apache 2.0<br/>BSD|
-|pathspec|0.10.3|Mozilla Public License 2.0 (MPL 2.0)|
+|pathspec|0.11.0|Mozilla Public License 2.0 (MPL 2.0)|
 |pbr|5.11.1|Apache 2.0|
 |platformdirs|2.6.2|MIT|
 |pluggy|1.0.0|MIT|
