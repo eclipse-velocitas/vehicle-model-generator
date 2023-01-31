@@ -24,6 +24,7 @@ import vspec  # type: ignore
 
 from cpp.cpp_generator import VehicleModelCppGenerator
 from python.python_generator import VehicleModelPythonGenerator
+from python.file_import import FileImport, UnsupportedFileFormat
 
 if __name__ == "__main__":
     # The arguments we accept
@@ -90,9 +91,9 @@ if __name__ == "__main__":
         "only for suppressing warnings/errors."
     )
     parser.add_argument(
-        "vspec_file",
-        metavar="<vspec_file>",
-        help="The vehicle specification file to convert.",
+        "import_file_path",
+        metavar="<import_file_path>",
+        help="The file to convert. Currently supports JSON and Vspec file formats.",
     )
 
     args = parser.parse_args()
@@ -111,28 +112,7 @@ if __name__ == "__main__":
             f"Known extended attributes: {', '.join(ext_attributes_list)}")
 
     try:
-        print("Loading vspec...")
-        tree = vspec.load_tree(
-            args.vspec_file,
-            include_dirs,
-            merge_private=False,
-            break_on_unknown_attribute=strict,
-            break_on_name_style_violation=strict,
-            expand_inst=False,
-        )
-
-        for overlay in args.overlays:
-            print(f"Applying VSS overlay from {overlay}...")
-            overlay_tree = vspec.load_tree(
-                overlay,
-                include_dirs,
-                merge_private=False,
-                break_on_unknown_attribute=strict,
-                break_on_name_style_violation=strict,
-                expand_inst=False
-            )
-            vspec.merge_tree(tree, overlay_tree)
-
+        tree = FileImport(args.import_file_path, include_dirs, strict, args.overlays).load_tree()
 
         if args.language == "python":
             print("Recursing tree and creating Python code...")
@@ -153,5 +133,8 @@ if __name__ == "__main__":
         else:
             print(f"Language {args.language} is not supported yet.")
     except vspec.VSpecError as e:
+        print(f"Error: {e}")
+        sys.exit(255)
+    except UnsupportedFileFormat as e:
         print(f"Error: {e}")
         sys.exit(255)
