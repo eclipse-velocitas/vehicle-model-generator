@@ -1,6 +1,4 @@
-#!/usr/bin/env python3
-
-# Copyright (c) 2022-2023 Robert Bosch GmbH and Microsoft Corporation
+# Copyright (c) 2023 Robert Bosch GmbH and Microsoft Corporation
 #
 # This program and the accompanying materials are made available under the
 # terms of the Apache License, Version 2.0 which is available at
@@ -13,8 +11,3 @@
 # under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-
-from sdv.model_generator.main import main
-
-if __name__ == "__main__":
-    main()
