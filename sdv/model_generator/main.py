@@ -37,6 +37,7 @@ def main():
         "-N",
         "--name",
         type=str,
+        default="vehicle",
         help="When generating a python model this is used as name of the module/package.\
              For C++ it is used as root namespace",
     )
@@ -53,9 +54,8 @@ def main():
         "-T",
         "--target-folder",
         type=str,
-        default="./vehicle_model",
-        help="The folder name (with relative path) where the code will be generated. \
-            Python package will be created with the same name.",
+        default="./gen_model",
+        help="The folder name (with relative path) where the code will be generated.",
     )
     parser.add_argument(
         "-s",
