@@ -17,7 +17,7 @@
 import os
 import re
 import shutil
-from typing import Set
+from typing import List, Set
 
 # Until vsspec issue will be fixed: https://github.com/COVESA/vss-tools/issues/208
 from vspec.model.constants import VSSType  # type: ignore
@@ -29,55 +29,63 @@ from sdv.model_generator.utils import CodeGeneratorContext
 class VehicleModelCppGenerator:
     """Generate c++ code for vehicle model."""
 
-    def __init__(self, root: VSSNode, target_folder: str, namespace: str):
+    def __init__(self, root_node: VSSNode, target_folder: str, root_namespace: str):
         """Initialize the c++ generator.
 
         Args:
             root (_type_): the vspec tree root node.
         """
-        self.root = root
+        self.root_node = root_node
         self.target_folder = target_folder
         self.ctx_header = CodeGeneratorContext()
         self.includes: Set[str] = set()
         self.external_includes: Set[str] = set()
-        self.root_namespace = namespace
+        if "::" in root_namespace:
+            self.root_namespace_list = root_namespace.split("::")
+        elif "." in root_namespace:
+            self.root_namespace_list = root_namespace.split(".")
+        elif "/" in root_namespace:
+            self.root_namespace_list = root_namespace.split("/")
+        else:
+            self.root_namespace_list = [root_namespace]
 
     def generate(self):
         """Generate c++ code for vehicle model."""
         self.root_path = os.path.join(self.target_folder, "include")
-        path = os.path.join(self.root_path, self.target_folder)
+
+        path = os.path.join(self.root_path, *self.root_namespace_list)
         if os.path.exists(path):
             shutil.rmtree(path)
         os.makedirs(path)
 
-        self.__gen_model(self.root, self.target_folder, True)
-        self.__visit_nodes(self.root, self.target_folder)
+        self.__gen_model(self.root_node, self.root_namespace_list, is_root=True)
+        self.__visit_nodes(self.root_node, self.root_namespace_list)
 
-    def __visit_nodes(self, node: VSSNode, parent_path: str):
+    def __visit_nodes(self, node: VSSNode, parent_namespace_list: List[str]):
         """Recursively render nodes."""
         for child in node.children:
-            child_path = os.path.join(parent_path, child.name)
-            path = os.path.join(self.root_path, child_path)
-            if child.type == VSSType.BRANCH:
-                if not os.path.exists(path):
-                    os.makedirs(path)
+            child_namespace_list = parent_namespace_list + [child.name]
+            child_path = os.path.join(self.root_path, *child_namespace_list)
 
-                self.__gen_model(child, child_path)
-                self.__visit_nodes(child, child_path)
+            if child.type == VSSType.BRANCH:
+                if not os.path.exists(child_path):
+                    os.makedirs(child_path)
+                self.__gen_model(child, child_namespace_list)
+                self.__visit_nodes(child, child_namespace_list)
 
     def __generate_opening_namespace_text(
-        self, root_namespace: str, node: VSSNode
+        self, root_namespace_list: List[str], node: VSSNode
     ) -> str:
         return (
             "namespace "
-            + "::".join([root_namespace] + self.__get_namespace_for_node(node))
+            + "::".join(root_namespace_list + self.__get_namespace_for_node(node))
             + " {\n"
         )
 
     def __generate_closing_namespace_text(
-        self, root_namespace: str, node: VSSNode
+        self, root_namespace_list: List[str], node: VSSNode
     ) -> str:
-        text = "::".join([root_namespace] + self.__get_namespace_for_node(node))
+        text = "::".join(root_namespace_list + self.__get_namespace_for_node(node))
         return "} // namespace " + text + "\n"
 
     def __get_namespace_for_node(self, node: VSSNode) -> list[str]:
@@ -85,7 +93,10 @@ class VehicleModelCppGenerator:
         return result
 
     def __generate_guard_name(self, node: VSSNode) -> str:
-        return "VMDL_" + "_".join([p.name.upper() for p in node.path]) + "_H"
+        path_list = [n.upper() for n in self.root_namespace_list]
+        path_list += [p.name.upper() for p in node.path]
+        path_list += [node.path[-1].name.upper()]
+        return "_".join(path_list) + "_H"
 
     def __gen_header(self, node: VSSNode):
         guard_name = self.__generate_guard_name(node)
@@ -97,7 +108,7 @@ class VehicleModelCppGenerator:
 
     def __gen_footer(self, node: VSSNode):
         self.ctx_header.write(
-            self.__generate_closing_namespace_text(self.root_namespace, node)
+            self.__generate_closing_namespace_text(self.root_namespace_list, node)
         )
         self.ctx_header.write(f"#endif // {self.__generate_guard_name(node)}\n")
 
@@ -227,8 +238,7 @@ class VehicleModelCppGenerator:
         # generate class code
         class_code_context = CodeGeneratorContext()
         class_code_context.write(
-            f"class {class_name} : \
-                                 public ParentClass {{\n"
+            f"class {class_name} : public ParentClass {{\n"
         )
 
         # one indentation is lost after the first line when using replace,
@@ -257,8 +267,9 @@ class VehicleModelCppGenerator:
         class_code_context.write("};\n")
         return class_code_context.get_content()
 
-    def __gen_collection_types(self, node: VSSNode, path: str) -> str:
+    def __gen_collection_types(self, node: VSSNode, namespace_list: List[str]) -> str:
         collection_types = []
+        path = os.path.join("", *namespace_list)
         for child in node.children:
             if child.type == VSSType.BRANCH:
                 self.includes.add(f"{path}/{child.name}/{child.name}")
@@ -282,15 +293,15 @@ class VehicleModelCppGenerator:
 
         return "\n\n".join(collection_types)
 
-    def __gen_model(self, node: VSSNode, path: str, is_root=False):
+    def __gen_model(self, node: VSSNode, namespace_list: List[str], is_root=False):
         # must be done before generating the imports, since it is adding imports
         # to the list
-        collection_types = self.__gen_collection_types(node, path)
+        collection_types = self.__gen_collection_types(node, namespace_list)
 
         self.__gen_header(node)
         self.__gen_imports(node)
         self.ctx_header.write(
-            self.__generate_opening_namespace_text(self.root_namespace, node)
+            self.__generate_opening_namespace_text(self.root_namespace_list, node)
         )
         # Provide an alias for the parent class to avoid name conflicts with members
         self.ctx_header.write("using ParentClass = Model;\n\n")
@@ -325,8 +336,8 @@ class VehicleModelCppGenerator:
 
                 if child.type.value in ("attribute", "sensor", "actuator"):
                     header_public.write(
-                        f"DataPoint{self.__get_data_type(child.datatype.value)} \
-                            {child.name};\n\n"
+                        f"DataPoint{self.__get_data_type(child.datatype.value)} "
+                        f"{child.name};\n\n"
                     )
                     member += ",\n\t\t" + f'{child.name}("{child.name}", this)'
 
@@ -345,7 +356,7 @@ class VehicleModelCppGenerator:
         self.__gen_footer(node)
 
         with open(
-            os.path.join(self.root_path, path, f"{node.name}.hpp"),
+            os.path.join(self.root_path, *namespace_list, f"{node.name}.hpp"),
             "w",
             encoding="utf-8",
         ) as file:
