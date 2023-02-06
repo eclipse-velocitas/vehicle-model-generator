@@ -5,7 +5,7 @@
 |:-----------|:-------:|--------:|
 |attrs|22.2.0|MIT|
 |bandit|1.7.4|Apache 2.0|
-|black|22.12.0|MIT|
+|black|23.1.0|MIT|
 |cfgv|3.3.1|MIT|
 |click|8.1.3|New BSD|
 |distlib|0.3.6|Python Software Foundation License|
@@ -19,14 +19,14 @@
 |isort|5.12.0|MIT|
 |mccabe|0.7.0|MIT|
 |mypy|0.991|MIT|
-|mypy-extensions|0.4.3|MIT|
+|mypy-extensions|1.0.0|MIT|
 |nodeenv|1.7.0|BSD|
 |packaging|23.0|Apache 2.0<br/>BSD|
 |pathspec|0.11.0|Mozilla Public License 2.0 (MPL 2.0)|
 |pbr|5.11.1|Apache 2.0|
 |platformdirs|2.6.2|MIT|
 |pluggy|1.0.0|MIT|
-|pre-commit|3.0.2|MIT|
+|pre-commit|3.0.4|MIT|
 |pycodestyle|2.10.0|MIT|
 |pydocstyle|6.3.0|MIT|
 |pyflakes|3.0.1|MIT|
@@ -43,3 +43,4 @@
 | Dependency | Version | License |
 |:-----------|:-------:|--------:|
 |actions/checkout|v3|MIT License|
+
