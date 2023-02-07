@@ -3,7 +3,7 @@ from typing import List
 from python.file_formats import formats, Json, Vspec
 from python.constants import VSPEC, JSON
 
-
+# if no other file supported format is found
 class UnsupportedFileFormat(Exception):
     def __init__(self, *args, **kwargs):
         self.file_name = args[0]
@@ -22,6 +22,7 @@ class FileImport:
         self.include_dirs = include_dirs
         self.strict = strict
         self.overlays = overlays
+        # setting the format from the file_path
         self.file_format = self.__get_format(self.file_path)
 
     def __get_format(self, file_path: str):
@@ -29,9 +30,9 @@ class FileImport:
             if re.match(r"^.+\." + f"{format}" + r"$", file_path):
                 if format == VSPEC:
                     return Vspec(file_path=self.file_path,
-                                             include_dirs=self.include_dirs,
-                                             strict=self.strict,
-                                             overlays=self.overlays)
+                                 include_dirs=self.include_dirs,
+                                 strict=self.strict,
+                                 overlays=self.overlays)
                 elif format == JSON:
                     return Json(file_path=file_path)
         raise UnsupportedFileFormat(self.file_path, 0, "Input file format is not supported")

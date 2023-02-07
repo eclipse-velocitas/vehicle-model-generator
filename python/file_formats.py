@@ -1,10 +1,10 @@
 from abc import abstractmethod
 from typing import List
 from python.constants import VSPEC, JSON
-from vspec.model.vsstree import VSSNode
 import vspec
 import json
 
+# supported file formats
 formats = [VSPEC, JSON]
 
 
@@ -12,6 +12,7 @@ class FileFormat:
     def __init__(self, file_path: str):
         self.file_path = file_path
 
+    # method to override when adding a new format
     @abstractmethod
     def load_tree(self):
         pass
@@ -53,25 +54,16 @@ class Json(FileFormat):
     def __init__(self, file_path: str):
         super().__init__(file_path)
 
+    # VSS nodes have a field "$file_name", so it needs to be added for the vss-tools to work
+    def extend_fields(self, d: dict):
+        if "children" in d:
+            for child_d in d["children"].values():
+                self.extend_fields(child_d)
+        d["$file_name$"] = ""
+        return
+
     def load_tree(self):
         output_json = json.load(open(self.file_path))
-        tree = None
-        for name, d in output_json.items():
-            tree = self.__dictToNode(name, d)
-        if tree is not None:
-            for child in tree.children:
-                child.parent = tree
+        self.extend_fields(next(iter(output_json.values())))
+        tree = vspec.render_tree(output_json)
         return tree
-
-    def __dictToNode(self, name: str, d: dict):
-        children = []
-        if "children" in d:
-            for child_name, child_d in d["children"].items():
-                children.append(self.__dictToNode(child_name, child_d))
-                '''node = self.__dictToNode(child_name, child_d)
-                for child in node["children"].values():
-                    child.parent = node
-                children.append(node)'''
-        return VSSNode(name, None, None, children)
-
-
