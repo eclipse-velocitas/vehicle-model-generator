@@ -23,7 +23,7 @@ from typing import Set
 from vspec.model.constants import VSSType  # type: ignore
 from vspec.model.vsstree import VSSNode  # type: ignore
 
-from utils import CodeGeneratorContext
+from sdv.model_generator.utils import CodeGeneratorContext
 
 
 class VehicleModelCppGenerator:

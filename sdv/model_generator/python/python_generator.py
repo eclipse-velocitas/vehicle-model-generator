@@ -22,37 +22,43 @@ from typing import List, Set
 from vspec.model.constants import VSSType  # type: ignore
 from vspec.model.vsstree import VSSNode  # type: ignore
 
-from python.vss_collection import VssCollection
-from utils import CodeGeneratorContext
+from sdv.model_generator.python.vss_collection import VssCollection
+from sdv.model_generator.utils import CodeGeneratorContext
 
 
 class VehicleModelPythonGenerator:
     """Generate python code for vehicle model."""
 
-    def __init__(self, root: VSSNode, target_folder: str, package_name: str):
+    def __init__(self, root_node: VSSNode, target_folder: str, root_package: str):
         """Initialize the python generator.
 
         Args:
             root (_type_): the vspec tree root node.
         """
-        self.root = root
+        self.root_node = root_node
         self.target_folder = target_folder
-        self.package_name = package_name
         self.ctx = CodeGeneratorContext()
         self.imports: Set[str] = set()
         self.model_imports: Set[str] = set()
         self.collections: List[VssCollection] = []
+        if "." in root_package:
+            self.root_package_list = root_package.split(".")
+        elif "/" in root_package:
+            self.root_package_list = root_package.split("/")
+        else:
+            self.root_package_list = [root_package]
 
     def generate(self):
         """Generate python code for vehicle model."""
-        path = self.target_folder
+        self.root_path = self.target_folder
 
-        if os.path.exists(path):
-            shutil.rmtree(path)
+        if os.path.exists(self.root_path):
+            shutil.rmtree(self.root_path)
+        path = os.path.join(self.root_path, *self.root_package_list)
         os.makedirs(path)
 
-        self.__gen_model(self.root, path, True)
-        self.__visit_nodes(self.root, path)
+        self.__gen_model(self.root_node, self.root_package_list, is_root=True)
+        self.__visit_nodes(self.root_node, self.root_package_list)
 
         self.__gen_package()
 
@@ -63,7 +69,7 @@ class VehicleModelPythonGenerator:
         )
         self.ctx.write("setup(\n")
         self.ctx.indent()
-        self.ctx.write(f'name="{self.package_name}",\n')
+        self.ctx.write(f'name="{".".join(self.root_package_list)}",\n')
         self.ctx.write('version="0.1.0",\n')
         self.ctx.write('description="Vehicle Model",\n')
         self.ctx.write("packages=find_packages(),\n")
@@ -71,23 +77,21 @@ class VehicleModelPythonGenerator:
         self.ctx.dedent()
         self.ctx.write(")\n")
 
-        path = os.path.dirname(self.target_folder)
-        with open(os.path.join(path, "setup.py"), "w", encoding="utf-8") as file:
+        path = os.path.join(self.target_folder, "setup.py")
+        with open(path, "w", encoding="utf-8") as file:
             file.write(self.ctx.get_content())
 
-    def __visit_nodes(self, node: VSSNode, path: str):
+    def __visit_nodes(self, node: VSSNode, parent_package_list: List[str]):
         """Recursively render nodes."""
-        # node_path = node.qualified_name()
-
         for child in node.children:
-            child_path = os.path.join(path, child.name)
+            child_package_list = parent_package_list + [child.name]
+            child_path = os.path.join(self.root_path, *child_package_list)
 
             if child.type.value == VSSType.BRANCH.value:
                 if not os.path.exists(child_path):
                     os.makedirs(child_path)
-                self.__gen_model(child, child_path)
-
-                self.__visit_nodes(child, child_path)
+                self.__gen_model(child, child_package_list)
+                self.__visit_nodes(child, child_package_list)
 
     def __gen_header(self, node: VSSNode):
         self.ctx.write(
@@ -112,7 +116,6 @@ class VehicleModelPythonGenerator:
         for imp in sorted(self.imports):
             if imp[0] == ".":
                 imp = imp[2:]
-            imp = imp.replace("/", ".")
             path = imp.split(".")
             self.ctx.write(f"from {imp} import {path[-1]}\n")
 
@@ -158,7 +161,7 @@ class VehicleModelPythonGenerator:
                 self.ctx.dedent()
         self.ctx.write('"""\n\n')
 
-    def __gen_model(self, node: VSSNode, path: str, is_root=False):
+    def __gen_model(self, node: VSSNode, package_list: List[str], is_root=False):
         self.ctx.write(f"class {node.name}(Model):\n")
         self.ctx.indent()
 
@@ -195,7 +198,7 @@ class VehicleModelPythonGenerator:
                     self.ctx.write(
                         f'self.{child.name} = {child.name}("{child.name}", self)\n'
                     )
-                self.imports.add(f"{path}/{child.name}")
+                self.imports.add(".".join(package_list + [child.name]))
             # else (ATTRIBUTE, SENSOR, ACTUATOR)
             elif child.type.value in (
                 VSSType.ATTRIBUTE.value,
@@ -203,8 +206,8 @@ class VehicleModelPythonGenerator:
                 VSSType.ACTUATOR.value,
             ):
                 self.ctx.write(
-                    f"self.{child.name} = \
-                        DataPoint{self.__get_datatype(child.datatype.value)}"
+                    f"self.{child.name} = "
+                    f"DataPoint{self.__get_datatype(child.datatype.value)}"
                     f'("{child.name}", self)\n'
                 )
                 self.model_imports.add(
@@ -223,6 +226,7 @@ class VehicleModelPythonGenerator:
         self.__gen_header(node)
         self.__gen_imports()
 
+        path = os.path.join(self.root_path, *package_list)
         with open(os.path.join(path, "__init__.py"), "w", encoding="utf-8") as file:
             file.write(self.ctx.get_content())
 

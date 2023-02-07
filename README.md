@@ -30,8 +30,8 @@ Or use VSCode Launch: Press ```F5```, select ```Python``` or ```cpp```.
 |:--------------------------------------------------|:-------------------------------------------------------------------------------------------------------------|
 `-h`, `--help`                                      | show this help message and exit
 `-I dir`, `--include-dir dir`                       | Add include directory to search for included vspec files.
-`-T TARGET_FOLDER`, `--target-folder TARGET_FOLDER` | The folder name (with relative path) where the code will be generated.
-`-N PACKAGE_NAME`, `--package-name PACKAGE_NAME`                | Name of the module/package.
+`-T TARGET_FOLDER`, `--target-folder TARGET_FOLDER` | The folder name (with relative path) where the code will be generated into.
+`-N PACKAGE_NAME`, `--package-name PACKAGE_NAME`    | Name of the root module/package (Python) or root namespace (C++).
 `-s`, `--strict`                                    | Use strict checking: Terminate when anything not covered or not recommended by the core VSS specs is found.
 `-l {python}`, `--language {python}`                | The target language of the generated code.
 `-o OVERLAY_FILE`, `--overlays OVERLAY_FILE`        | Add overlays that will be layered on top of the VSS file in the order they appear.
