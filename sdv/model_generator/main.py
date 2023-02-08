@@ -24,6 +24,7 @@ import vspec  # type: ignore
 
 from sdv.model_generator.cpp.cpp_generator import VehicleModelCppGenerator
 from sdv.model_generator.python.python_generator import VehicleModelPythonGenerator
+from sdv.model_generator.tree_generator.file_import import FileImport
 
 
 def main():
@@ -91,9 +92,9 @@ def main():
         "only for suppressing warnings/errors."
     )
     parser.add_argument(
-        "vspec_file",
-        metavar="<vspec_file>",
-        help="The vehicle specification file to convert.",
+        "import_file_path",
+        metavar="<import_file_path>",
+        help="The file to convert. Currently supports JSON and Vspec file formats.",
     )
 
     args = parser.parse_args()
@@ -112,28 +113,10 @@ def main():
             f"Known extended attributes: {', '.join(ext_attributes_list)}")
 
     try:
-        print("Loading vspec...")
-        tree = vspec.load_tree(
-            args.vspec_file,
-            include_dirs,
-            merge_private=False,
-            break_on_unknown_attribute=strict,
-            break_on_name_style_violation=strict,
-            expand_inst=False,
-        )
 
-        for overlay in args.overlays:
-            print(f"Applying VSS overlay from {overlay}...")
-            overlay_tree = vspec.load_tree(
-                overlay,
-                include_dirs,
-                merge_private=False,
-                break_on_unknown_attribute=strict,
-                break_on_name_style_violation=strict,
-                expand_inst=False
-            )
-            vspec.merge_tree(tree, overlay_tree)
-
+        tree = FileImport(args.import_file_path,
+                          include_dirs, strict,
+                          args.overlays).load_tree()
 
         if args.language == "python":
             print("Recursing tree and creating Python code...")
