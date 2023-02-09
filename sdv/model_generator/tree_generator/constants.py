@@ -1,0 +1,2 @@
+VSPEC = "vspec"
+JSON = "json"
