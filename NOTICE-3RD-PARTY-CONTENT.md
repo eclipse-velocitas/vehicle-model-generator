@@ -18,13 +18,13 @@
 |iniconfig|2.0.0|MIT|
 |isort|5.12.0|MIT|
 |mccabe|0.7.0|MIT|
-|mypy|0.991|MIT|
+|mypy|1.0.0|MIT|
 |mypy-extensions|1.0.0|MIT|
 |nodeenv|1.7.0|BSD|
 |packaging|23.0|Apache 2.0<br/>BSD|
 |pathspec|0.11.0|Mozilla Public License 2.0 (MPL 2.0)|
 |pbr|5.11.1|Apache 2.0|
-|platformdirs|2.6.2|MIT|
+|platformdirs|3.0.0|MIT|
 |pluggy|1.0.0|MIT|
 |pre-commit|3.0.4|MIT|
 |pycodestyle|2.10.0|MIT|
@@ -38,7 +38,7 @@
 |stevedore|4.1.1|Apache 2.0|
 |tomli|2.0.1|MIT|
 |typing-extensions|4.4.0|Python Software Foundation License|
-|virtualenv|20.17.1|MIT|
+|virtualenv|20.19.0|MIT|
 ## Workflows
 | Dependency | Version | License |
 |:-----------|:-------:|--------:|
