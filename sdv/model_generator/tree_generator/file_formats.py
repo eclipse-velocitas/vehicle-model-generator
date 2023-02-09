@@ -64,8 +64,10 @@ class Json(FileFormat):
         return
 
     def load_tree(self):
+        print("Loading json...")
         output_json = json.load(open(self.file_path))
         self.extend_fields(next(iter(output_json.values())))
+        print()
         tree = vspec.render_tree(output_json)
         return tree
 

@@ -11,11 +11,14 @@ This generator creates a vehicle model from the given vspec specification for th
 
 ## Usage
 
-Invoke the `gen_vehicle_model.py` script with the path to the vspec file you wish to generate code for, additionally passing include pathes to directories which contain referenced vspec files:
+Invoke the `gen_vehicle_model.py` script with the path to the vspec or json file you wish to generate code for, additionally passing include pathes to directories which contain referenced vspec files:
 ```bash
 python3 gen_vehicle_model.py -I <path_to_dir_with_included_vspec_files> <path_to_your_vspec_file>
 ```
-
+or
+```bash
+python3 gen_vehicle_model.py <path_to_your_json_file>
+```
 ### Example
 ```bash
 git clone https://github.com/COVESA/vehicle_signal_specification.git
