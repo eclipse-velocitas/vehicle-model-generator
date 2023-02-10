@@ -24,6 +24,7 @@ from vspec.model.constants import VSSType  # type: ignore
 from vspec.model.vsstree import VSSNode  # type: ignore
 
 from sdv.model_generator.utils import CodeGeneratorContext
+from sdv.model_generator.cpp.cpp_keywords import cpp_keywords
 
 
 class VehicleModelCppGenerator:
@@ -77,20 +78,23 @@ class VehicleModelCppGenerator:
         self, namespace_list: List[str]
     ) -> str:
         return (
-            "namespace "
-            + "::".join(namespace_list)
-            + " {\n"
+            "namespace " + self.__get_namespace(namespace_list) + " {\n"
         )
 
     def __generate_closing_namespace_text(
         self, namespace_list: List[str]
     ) -> str:
-        text = "::".join(namespace_list)
-        return "} // namespace " + text + "\n"
+        return "} // namespace " + self.__get_namespace(namespace_list) + "\n"
 
-    def __get_namespace_for_node(self, namespace_list: List[str]) -> list[str]:
-        result = [n.lower().replace("switch", "switch_") for n in namespace_list]
-        return result
+    def __convert_to_namespace(self, name: str) -> str:
+        namespace = name.lower()
+        if namespace in cpp_keywords:
+            namespace += "_"
+        return namespace
+
+    def __get_namespace(self, namespace_list: List[str]) -> str:
+        converted_list = [self.__convert_to_namespace(n) for n in namespace_list]
+        return "::".join(converted_list)
 
     def __generate_guard_name(self, namespace_list: List[str], node: VSSNode) -> str:
         path_list = [n.upper() for n in namespace_list]
@@ -109,7 +113,9 @@ class VehicleModelCppGenerator:
         self.ctx_header.write(
             self.__generate_closing_namespace_text(namespace_list)
         )
-        self.ctx_header.write(f"#endif // {self.__generate_guard_name(namespace_list, node)}\n")
+        self.ctx_header.write(
+            f"#endif // {self.__generate_guard_name(namespace_list, node)}\n"
+        )
 
     def __gen_imports(self, node: VSSNode):
         self.ctx_header.write('#include "sdk/DataPoint.h"\n')
@@ -161,10 +167,11 @@ class VehicleModelCppGenerator:
         self.ctx_header.write("**/\n")
 
     def __gen_nested_class(
-        self, namespace_list: List[str], child: VSSNode, instances: list[tuple[str, list]], index: int
+        self, namespace_list: List[str], child: VSSNode,
+        instances: list[tuple[str, list]], index: int
     ) -> str:
-
-        child_namespace = "::".join(self.__get_namespace_for_node(namespace_list))
+        child_namespace_list = namespace_list + [child.name]
+        child_namespace = self.__get_namespace(child_namespace_list)
         name, values = instances[index]
         nested_name = (
             instances[index + 1][0] if index + 1 < len(instances) else child.name
@@ -282,7 +289,9 @@ class VehicleModelCppGenerator:
 
                     # create all nested classes for this sub-tree
                     for i in range(len(instances) - 1):
-                        nested_class = self.__gen_nested_class(namespace_list, child, instances, i)
+                        nested_class = self.__gen_nested_class(
+                            namespace_list, child, instances, i
+                        )
                         generated_classes.append(nested_class)
 
                     collection_types.append(
@@ -304,7 +313,7 @@ class VehicleModelCppGenerator:
             self.__generate_opening_namespace_text(namespace_list)
         )
         # Provide an alias for the parent class to avoid name conflicts with members
-        self.ctx_header.write("using ParentClass = Model;\n\n")
+        self.ctx_header.write("using ParentClass = velocitas::Model;\n\n")
         self.__gen_model_docstring(node)
         self.ctx_header.write(f"class {node.name} : public ParentClass {{\n")
         self.ctx_header.write("public:\n")
@@ -331,13 +340,12 @@ class VehicleModelCppGenerator:
             # create members
             member = ""
             for child in node.children:
-                child_namespace = "::".join(self.__get_namespace_for_node(namespace_list))
                 self.__document_member(child)
 
                 if child.type.value in ("attribute", "sensor", "actuator"):
+                    data_type = self.__get_data_type(child.datatype.value)
                     header_public.write(
-                        f"DataPoint{self.__get_data_type(child.datatype.value)} "
-                        f"{child.name};\n\n"
+                        f"velocitas::DataPoint{data_type} {child.name};\n\n"
                     )
                     member += ",\n\t\t" + f'{child.name}("{child.name}", this)'
 
@@ -346,6 +354,8 @@ class VehicleModelCppGenerator:
                         header_public.write(f"{child.name}Collection {child.name};\n\n")
                         member += ",\n\t\t" + f"{child.name}(this)"
                     else:
+                        child_namespace_list = namespace_list + [child.name]
+                        child_namespace = self.__get_namespace(child_namespace_list)
                         header_public.write(
                             f"{child_namespace}::{child.name} {child.name};\n\n"
                         )
