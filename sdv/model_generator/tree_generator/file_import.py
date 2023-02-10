@@ -14,8 +14,9 @@
 
 import re
 from typing import List
-from sdv.model_generator.tree_generator.file_formats import formats, Json, Vspec
-from sdv.model_generator.tree_generator.constants import VSPEC, JSON
+
+from sdv.model_generator.tree_generator.constants import JSON, VSPEC
+from sdv.model_generator.tree_generator.file_formats import Json, Vspec, formats
 
 
 # if no other file supported format is found
@@ -31,7 +32,6 @@ class UnsupportedFileFormat(Exception):
 
 
 class FileImport:
-
     def __init__(self, file_path: str, include_dirs: List, strict, overlays):
         self.file_path = file_path
         self.include_dirs = include_dirs
@@ -44,16 +44,17 @@ class FileImport:
         for format in formats:
             if re.match(r"^.+\." + f"{format}" + r"$", file_path):
                 if format == VSPEC:
-                    return Vspec(file_path=self.file_path,
-                                 include_dirs=self.include_dirs,
-                                 strict=self.strict,
-                                 overlays=self.overlays)
+                    return Vspec(
+                        file_path=self.file_path,
+                        include_dirs=self.include_dirs,
+                        strict=self.strict,
+                        overlays=self.overlays,
+                    )
                 elif format == JSON:
                     return Json(file_path=file_path)
-        raise UnsupportedFileFormat(self.file_path,
-                                    0,
-                                    "Input file format is not supported")
+        raise UnsupportedFileFormat(
+            self.file_path, 0, "Input file format is not supported"
+        )
 
     def load_tree(self):
         return self.file_format.load_tree()
-

@@ -80,7 +80,7 @@ def main():
         type=str,
         default=[],
         help="Add overlays that will be layered on top of the VSS file in the order they"
-        " appear."
+        " appear.",
     )
     parser.add_argument(
         "-e",
@@ -89,7 +89,7 @@ def main():
         default="",
         help="Whitelisted extended attributes as comma separated list. Note, that "
         "extended attributes aren't considered by the generator. This paramter is "
-        "only for suppressing warnings/errors."
+        "only for suppressing warnings/errors.",
     )
     parser.add_argument(
         "import_file_path",
@@ -108,15 +108,15 @@ def main():
 
     ext_attributes_list = args.extended_attributes.split(",")
     if len(ext_attributes_list) > 0:
-        vspec.model.vsstree.VSSNode.whitelisted_extended_attributes = ext_attributes_list
-        print(
-            f"Known extended attributes: {', '.join(ext_attributes_list)}")
+        vspec.model.vsstree.VSSNode.whitelisted_extended_attributes = (
+            ext_attributes_list
+        )
+        print(f"Known extended attributes: {', '.join(ext_attributes_list)}")
 
     try:
-
-        tree = FileImport(args.import_file_path,
-                          include_dirs, strict,
-                          args.overlays).load_tree()
+        tree = FileImport(
+            args.import_file_path, include_dirs, strict, args.overlays
+        ).load_tree()
 
         if args.language == "python":
             print("Recursing tree and creating Python code...")
@@ -143,4 +143,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

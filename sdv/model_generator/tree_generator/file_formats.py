@@ -12,11 +12,14 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+import json
 from abc import abstractmethod
 from typing import List
-from sdv.model_generator.tree_generator.constants import VSPEC, JSON
-import vspec
-import json
+
+# Until vsspec issue will be fixed: https://github.com/COVESA/vss-tools/issues/208
+import vspec  # type: ignore
+
+from sdv.model_generator.tree_generator.constants import JSON, VSPEC
 
 # supported file formats
 formats = [VSPEC, JSON]
@@ -58,7 +61,7 @@ class Vspec(FileFormat):
                 merge_private=False,
                 break_on_unknown_attribute=self.strict,
                 break_on_name_style_violation=self.strict,
-                expand_inst=False
+                expand_inst=False,
             )
             vspec.merge_tree(tree, overlay_tree)
         return tree
@@ -68,7 +71,7 @@ class Json(FileFormat):
     def __init__(self, file_path: str):
         super().__init__(file_path)
 
-    # VSS nodes have a field "$file_name", 
+    # VSS nodes have a field "$file_name",
     # so it needs to be added for the vss-tools to work
     def extend_fields(self, d: dict):
         if "children" in d:
@@ -84,4 +87,3 @@ class Json(FileFormat):
         print("Generating tree from json...")
         tree = vspec.render_tree(output_json)
         return tree
-
