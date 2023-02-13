@@ -35,7 +35,7 @@
 |setuptools|58.1.0|MIT|
 |smmap|5.0.0|BSD|
 |snowballstemmer|2.2.0|New BSD|
-|stevedore|4.1.1|Apache 2.0|
+|stevedore|5.0.0|Apache 2.0|
 |tomli|2.0.1|MIT|
 |typing-extensions|4.4.0|Python Software Foundation License|
 |virtualenv|20.19.0|MIT|
