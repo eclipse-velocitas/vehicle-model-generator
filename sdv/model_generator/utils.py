@@ -12,8 +12,16 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-"""CodeGeneratorContext."""
+import re
 from typing import Optional
+
+
+def to_snake_case(camel_case_input):
+    separation_pattern = (
+        r"[A-Z]?[a-z]+|[A-Z]{2,}(?=[A-Z][a-z]|\d|\W|$)|\d+|[A-Z]{2,}|[A-Z]"
+    )
+    parts = re.findall(separation_pattern, camel_case_input)
+    return "_".join(map(str.lower, parts))
 
 
 class CodeGeneratorContext:

@@ -23,8 +23,8 @@ from typing import List, Set
 from vspec.model.constants import VSSType  # type: ignore
 from vspec.model.vsstree import VSSNode  # type: ignore
 
-from sdv.model_generator.utils import CodeGeneratorContext
 from sdv.model_generator.cpp.cpp_keywords import cpp_keywords
+from sdv.model_generator.utils import CodeGeneratorContext, to_snake_case
 
 
 class VehicleModelCppGenerator:
@@ -54,7 +54,9 @@ class VehicleModelCppGenerator:
         """Generate c++ code for vehicle model."""
         self.root_path = os.path.join(self.target_folder, "include")
 
-        path = os.path.join(self.root_path, *self.root_namespace_list)
+        path = os.path.join(
+            self.root_path, *self.__to_folder_names(self.root_namespace_list)
+        )
         if os.path.exists(path):
             shutil.rmtree(path)
         os.makedirs(path)
@@ -66,7 +68,9 @@ class VehicleModelCppGenerator:
         """Recursively render nodes."""
         for child in node.children:
             child_namespace_list = parent_namespace_list + [child.name]
-            child_path = os.path.join(self.root_path, *child_namespace_list)
+            child_path = os.path.join(
+                self.root_path, *self.__to_folder_names(child_namespace_list)
+            )
 
             if child.type == VSSType.BRANCH:
                 if not os.path.exists(child_path):
@@ -74,30 +78,27 @@ class VehicleModelCppGenerator:
                 self.__gen_model(child, child_namespace_list)
                 self.__visit_nodes(child, child_namespace_list)
 
-    def __generate_opening_namespace_text(
-        self, namespace_list: List[str]
-    ) -> str:
-        return (
-            "namespace " + self.__get_namespace(namespace_list) + " {\n"
-        )
+    def __generate_opening_namespace_text(self, namespace_list: List[str]) -> str:
+        return "namespace " + self.__get_namespace(namespace_list) + " {\n"
 
-    def __generate_closing_namespace_text(
-        self, namespace_list: List[str]
-    ) -> str:
+    def __generate_closing_namespace_text(self, namespace_list: List[str]) -> str:
         return "} // namespace " + self.__get_namespace(namespace_list) + "\n"
 
     def __convert_to_namespace(self, name: str) -> str:
-        namespace = name.lower()
+        namespace = to_snake_case(name)
         if namespace in cpp_keywords:
             namespace += "_"
         return namespace
+
+    def __to_folder_names(self, namespace_list: List[str]) -> List[str]:
+        return [self.__convert_to_namespace(n) for n in namespace_list]
 
     def __get_namespace(self, namespace_list: List[str]) -> str:
         converted_list = [self.__convert_to_namespace(n) for n in namespace_list]
         return "::".join(converted_list)
 
     def __generate_guard_name(self, namespace_list: List[str], node: VSSNode) -> str:
-        path_list = [n.upper() for n in namespace_list]
+        path_list = [n.upper() for n in self.__to_folder_names(namespace_list)]
         path_list.append(node.name.upper())
         return "_".join(path_list) + "_H"
 
@@ -110,9 +111,7 @@ class VehicleModelCppGenerator:
         )
 
     def __gen_footer(self, namespace_list: List[str], node: VSSNode):
-        self.ctx_header.write(
-            self.__generate_closing_namespace_text(namespace_list)
-        )
+        self.ctx_header.write(self.__generate_closing_namespace_text(namespace_list))
         self.ctx_header.write(
             f"#endif // {self.__generate_guard_name(namespace_list, node)}\n"
         )
@@ -167,8 +166,11 @@ class VehicleModelCppGenerator:
         self.ctx_header.write("**/\n")
 
     def __gen_nested_class(
-        self, namespace_list: List[str], child: VSSNode,
-        instances: list[tuple[str, list]], index: int
+        self,
+        namespace_list: List[str],
+        child: VSSNode,
+        instances: list[tuple[str, list]],
+        index: int,
     ) -> str:
         child_namespace_list = namespace_list + [child.name]
         child_namespace = self.__get_namespace(child_namespace_list)
@@ -244,9 +246,7 @@ class VehicleModelCppGenerator:
 
         # generate class code
         class_code_context = CodeGeneratorContext()
-        class_code_context.write(
-            f"class {class_name} : public ParentClass {{\n"
-        )
+        class_code_context.write(f"class {class_name} : public ParentClass {{\n")
 
         # one indentation is lost after the first line when using replace,
         # that`s why we add an additional one for nested classes
@@ -276,10 +276,11 @@ class VehicleModelCppGenerator:
 
     def __gen_collection_types(self, node: VSSNode, namespace_list: List[str]) -> str:
         collection_types = []
-        path = os.path.join("", *namespace_list)
         for child in node.children:
             if child.type == VSSType.BRANCH:
-                self.includes.add(f"{path}/{child.name}/{child.name}")
+                child_namespace_list = namespace_list + [child.name]
+                path = os.path.join("", *self.__to_folder_names(child_namespace_list))
+                self.includes.add(f"{path}/{child.name}")
 
                 if child.instances:
                     instances = [
@@ -309,9 +310,7 @@ class VehicleModelCppGenerator:
 
         self.__gen_header(namespace_list, node)
         self.__gen_imports(node)
-        self.ctx_header.write(
-            self.__generate_opening_namespace_text(namespace_list)
-        )
+        self.ctx_header.write(self.__generate_opening_namespace_text(namespace_list))
         # Provide an alias for the parent class to avoid name conflicts with members
         self.ctx_header.write("using ParentClass = velocitas::Model;\n\n")
         self.__gen_model_docstring(node)
@@ -366,7 +365,11 @@ class VehicleModelCppGenerator:
         self.__gen_footer(namespace_list, node)
 
         with open(
-            os.path.join(self.root_path, *namespace_list, f"{node.name}.hpp"),
+            os.path.join(
+                self.root_path,
+                *self.__to_folder_names(namespace_list),
+                f"{node.name}.hpp",
+            ),
             "w",
             encoding="utf-8",
         ) as file:
