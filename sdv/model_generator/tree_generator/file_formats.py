@@ -73,17 +73,17 @@ class Json(FileFormat):
 
     # VSS nodes have a field "$file_name",
     # so it needs to be added for the vss-tools to work
-    def extend_fields(self, d: dict):
+    def __extend_fields(self, d: dict):
         if "children" in d:
             for child_d in d["children"].values():
-                self.extend_fields(child_d)
+                self.__extend_fields(child_d)
         d["$file_name$"] = ""
         return
 
     def load_tree(self):
         print("Loading json...")
         output_json = json.load(open(self.file_path))
-        self.extend_fields(next(iter(output_json.values())))
+        self.__extend_fields(next(iter(output_json.values())))
         print("Generating tree from json...")
         tree = vspec.render_tree(output_json)
         return tree

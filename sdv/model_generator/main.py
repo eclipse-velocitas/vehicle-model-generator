@@ -24,7 +24,10 @@ import vspec  # type: ignore
 
 from sdv.model_generator.cpp.cpp_generator import VehicleModelCppGenerator
 from sdv.model_generator.python.python_generator import VehicleModelPythonGenerator
-from sdv.model_generator.tree_generator.file_import import FileImport
+from sdv.model_generator.tree_generator.file_import import (
+    FileImport,
+    UnsupportedFileFormat,
+)
 
 
 def main():
@@ -92,8 +95,8 @@ def main():
         "only for suppressing warnings/errors.",
     )
     parser.add_argument(
-        "import_file_path",
-        metavar="<import_file_path>",
+        "input_file_path",
+        metavar="<input_file_path>",
         help="The file to convert. Currently supports JSON and Vspec file formats.",
     )
 
@@ -115,7 +118,7 @@ def main():
 
     try:
         tree = FileImport(
-            args.import_file_path, include_dirs, strict, args.overlays
+            args.input_file_path, include_dirs, strict, args.overlays
         ).load_tree()
 
         if args.language == "python":
@@ -137,6 +140,9 @@ def main():
         else:
             print(f"Language {args.language} is not supported yet.")
     except vspec.VSpecError as e:
+        print(f"Error: {e}")
+        sys.exit(255)
+    except UnsupportedFileFormat as e:
         print(f"Error: {e}")
         sys.exit(255)
 

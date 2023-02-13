@@ -12,7 +12,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import re
+import os
 from typing import List
 
 from sdv.model_generator.tree_generator.constants import JSON, VSPEC
@@ -21,14 +21,13 @@ from sdv.model_generator.tree_generator.file_formats import Json, Vspec, formats
 
 # if no other file supported format is found
 class UnsupportedFileFormat(Exception):
-    def __init__(self, *args, **kwargs):
-        self.file_name = args[0]
-        self.line_nr = args[1]
-        self.message = args[2]
-        Exception.__init__(self, *args, **kwargs)
+    def __init__(self, format):
+        self.format = format
+        self.message = f"The {self.format} file format is not supported"
+        Exception.__init__(self, self.message)
 
     def __str__(self):
-        return "{}: {}: {}".format(self.file_name, self.line_nr, self.message)
+        return self.message
 
 
 class FileImport:
@@ -37,24 +36,23 @@ class FileImport:
         self.include_dirs = include_dirs
         self.strict = strict
         self.overlays = overlays
-        # setting the format from the file_path
-        self.file_format = self.__get_format(self.file_path)
+        # setting the file format implementation object from the file_path
+        self.format_implementation = self.__get_format_implementation(self.file_path)
 
-    def __get_format(self, file_path: str):
-        for format in formats:
-            if re.match(r"^.+\." + f"{format}" + r"$", file_path):
-                if format == VSPEC:
-                    return Vspec(
-                        file_path=self.file_path,
-                        include_dirs=self.include_dirs,
-                        strict=self.strict,
-                        overlays=self.overlays,
-                    )
-                elif format == JSON:
-                    return Json(file_path=file_path)
-        raise UnsupportedFileFormat(
-            self.file_path, 0, "Input file format is not supported"
-        )
+    def __get_format_implementation(self, file_path: str):
+        file_ext = os.path.splitext(file_path)[1][1:]
+        if file_ext in formats:
+            if file_ext == VSPEC:
+                return Vspec(
+                    file_path=self.file_path,
+                    include_dirs=self.include_dirs,
+                    strict=self.strict,
+                    overlays=self.overlays,
+                )
+            elif file_ext == JSON:
+                return Json(file_path=file_path)
+        else:
+            raise UnsupportedFileFormat(file_ext)
 
     def load_tree(self):
-        return self.file_format.load_tree()
+        return self.format_implementation.load_tree()
