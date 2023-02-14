@@ -24,6 +24,10 @@ import vspec  # type: ignore
 
 from sdv.model_generator.cpp.cpp_generator import VehicleModelCppGenerator
 from sdv.model_generator.python.python_generator import VehicleModelPythonGenerator
+from sdv.model_generator.tree_generator.file_import import (
+    FileImport,
+    UnsupportedFileFormat,
+)
 
 
 def main():
@@ -79,7 +83,7 @@ def main():
         type=str,
         default=[],
         help="Add overlays that will be layered on top of the VSS file in the order they"
-        " appear."
+        " appear.",
     )
     parser.add_argument(
         "-e",
@@ -88,12 +92,12 @@ def main():
         default="",
         help="Whitelisted extended attributes as comma separated list. Note, that "
         "extended attributes aren't considered by the generator. This paramter is "
-        "only for suppressing warnings/errors."
+        "only for suppressing warnings/errors.",
     )
     parser.add_argument(
-        "vspec_file",
-        metavar="<vspec_file>",
-        help="The vehicle specification file to convert.",
+        "input_file_path",
+        metavar="<input_file_path>",
+        help="The file to convert. Currently supports JSON and Vspec file formats.",
     )
 
     args = parser.parse_args()
@@ -107,33 +111,15 @@ def main():
 
     ext_attributes_list = args.extended_attributes.split(",")
     if len(ext_attributes_list) > 0:
-        vspec.model.vsstree.VSSNode.whitelisted_extended_attributes = ext_attributes_list
-        print(
-            f"Known extended attributes: {', '.join(ext_attributes_list)}")
+        vspec.model.vsstree.VSSNode.whitelisted_extended_attributes = (
+            ext_attributes_list
+        )
+        print(f"Known extended attributes: {', '.join(ext_attributes_list)}")
 
     try:
-        print("Loading vspec...")
-        tree = vspec.load_tree(
-            args.vspec_file,
-            include_dirs,
-            merge_private=False,
-            break_on_unknown_attribute=strict,
-            break_on_name_style_violation=strict,
-            expand_inst=False,
-        )
-
-        for overlay in args.overlays:
-            print(f"Applying VSS overlay from {overlay}...")
-            overlay_tree = vspec.load_tree(
-                overlay,
-                include_dirs,
-                merge_private=False,
-                break_on_unknown_attribute=strict,
-                break_on_name_style_violation=strict,
-                expand_inst=False
-            )
-            vspec.merge_tree(tree, overlay_tree)
-
+        tree = FileImport(
+            args.input_file_path, include_dirs, strict, args.overlays
+        ).load_tree()
 
         if args.language == "python":
             print("Recursing tree and creating Python code...")
@@ -156,8 +142,10 @@ def main():
     except vspec.VSpecError as e:
         print(f"Error: {e}")
         sys.exit(255)
+    except UnsupportedFileFormat as e:
+        print(f"Error: {e}")
+        sys.exit(255)
 
 
 if __name__ == "__main__":
     main()
-

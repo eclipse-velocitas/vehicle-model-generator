@@ -153,7 +153,6 @@ class VehicleModelCppGenerator:
     def __gen_nested_class(
         self, child: VSSNode, instances: list[tuple[str, list]], index: int
     ) -> str:
-
         child_namespace = "::".join(self.__get_namespace_for_node(child))
         name, values = instances[index]
         nested_name = (
@@ -375,7 +374,6 @@ class VehicleModelCppGenerator:
         return result
 
     def __parse_instances(self, reg_ex, i) -> tuple[str, list]:
-
         # parse string instantiation elements (e.g. Row[1,5])
         if isinstance(i, str):
             if re.match(reg_ex, i):
