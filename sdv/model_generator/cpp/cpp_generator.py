@@ -112,6 +112,7 @@ class VehicleModelCppGenerator:
 
     def __gen_footer(self, namespace_list: List[str], node: VSSNode):
         self.ctx_header.write(self.__generate_closing_namespace_text(namespace_list))
+        self.ctx_header.write("\n")
         self.ctx_header.write(
             f"#endif // {self.__generate_guard_name(namespace_list, node)}\n"
         )
@@ -360,7 +361,7 @@ class VehicleModelCppGenerator:
                         )
                         member += ",\n\t\t" + f'{child.name}("{child.name}", this)'
 
-        self.ctx_header.write("};\n")
+        self.ctx_header.write("};\n\n")
 
         self.__gen_footer(namespace_list, node)
 
