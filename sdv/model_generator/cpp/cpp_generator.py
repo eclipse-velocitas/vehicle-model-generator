@@ -24,7 +24,7 @@ from vspec.model.constants import VSSType  # type: ignore
 from vspec.model.vsstree import VSSNode  # type: ignore
 
 from sdv.model_generator.cpp.cpp_keywords import cpp_keywords
-from sdv.model_generator.utils import CodeGeneratorContext, to_snake_case
+from sdv.model_generator.utils import CodeGeneratorContext, camel_to_snake_case
 
 
 class VehicleModelCppGenerator:
@@ -41,14 +41,16 @@ class VehicleModelCppGenerator:
         self.ctx_header = CodeGeneratorContext()
         self.includes: Set[str] = set()
         self.external_includes: Set[str] = set()
-        if "::" in root_namespace:
-            self.root_namespace_list = root_namespace.split("::")
-        elif "." in root_namespace:
-            self.root_namespace_list = root_namespace.split(".")
-        elif "/" in root_namespace:
-            self.root_namespace_list = root_namespace.split("/")
-        else:
-            self.root_namespace_list = [root_namespace]
+        self.root_namespace_list = self.__split_into_namespace_list(root_namespace)
+
+    def __split_into_namespace_list(self, namespace: str) -> List[str]:
+        if "::" in namespace:
+            return namespace.split("::")
+        elif "." in namespace:
+            return namespace.split(".")
+        elif "/" in namespace:
+            return namespace.split("/")
+        return [namespace]
 
     def generate(self):
         """Generate c++ code for vehicle model."""
@@ -85,7 +87,7 @@ class VehicleModelCppGenerator:
         return "} // namespace " + self.__get_namespace(namespace_list) + "\n"
 
     def __convert_to_namespace(self, name: str) -> str:
-        namespace = to_snake_case(name)
+        namespace = camel_to_snake_case(name)
         if namespace in cpp_keywords:
             namespace += "_"
         return namespace
@@ -212,6 +214,7 @@ class VehicleModelCppGenerator:
             min_value = values[1]
             max_value = values[2] + 1
             self.external_includes.add("stdexcept")
+            self.external_includes.add("string")
 
         if nested_name == "Choice":
             for value in nested_values:
@@ -236,8 +239,8 @@ class VehicleModelCppGenerator:
                         return_scope.write(f"return {range_name}{v};\n")
                     method_scope.write("}\n")
                 method_scope.write(
-                    f'throw std::runtime_error("Given value is outside of allowed range\
-                        [{min_value};{max_value}]!");\n'
+                    'throw std::runtime_error("Given value is outside of allowed range '
+                    f'[{min_value};{max_value}]!");\n'
                 )
                 self.external_includes.add("stdexcept")
             method_context.write("}\n")
@@ -280,8 +283,10 @@ class VehicleModelCppGenerator:
         for child in node.children:
             if child.type == VSSType.BRANCH:
                 child_namespace_list = namespace_list + [child.name]
-                path = os.path.join("", *self.__to_folder_names(child_namespace_list))
-                self.includes.add(f"{path}/{child.name}")
+                path = os.path.join(
+                    *self.__to_folder_names(child_namespace_list), child.name
+                )
+                self.includes.add(path)
 
                 if child.instances:
                     instances = [
@@ -332,6 +337,7 @@ class VehicleModelCppGenerator:
                 )
                 header_public.indent()
                 header_public.write("ParentClass(name, parent)")
+                self.external_includes.add("string")
 
             header_public.write("%MEMBER%\n")
             header_public.dedent()

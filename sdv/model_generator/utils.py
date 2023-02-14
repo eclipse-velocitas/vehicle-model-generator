@@ -16,11 +16,11 @@ import re
 from typing import Optional
 
 
-def to_snake_case(camel_case_input):
+def camel_to_snake_case(input: str) -> str:
     separation_pattern = (
         r"[A-Z]?[a-z]+|[A-Z]{2,}(?=[A-Z][a-z]|\d|\W|$)|\d+|[A-Z]{2,}|[A-Z]"
     )
-    parts = re.findall(separation_pattern, camel_case_input)
+    parts = re.findall(separation_pattern, input)
     return "_".join(map(str.lower, parts))
 
 
