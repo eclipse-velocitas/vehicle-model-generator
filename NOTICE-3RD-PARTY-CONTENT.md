@@ -4,15 +4,15 @@
 | Dependency | Version | License |
 |:-----------|:-------:|--------:|
 |bandit|1.7.5|Apache 2.0|
-|black|23.3.0|MIT|
+|black|23.7.0|MIT|
 |cfgv|3.3.1|MIT|
-|click|8.1.3|New BSD|
+|click|8.1.4|New BSD|
 |distlib|0.3.6|Python Software Foundation License|
 |exceptiongroup|1.1.2|MIT|
 |filelock|3.12.2|The Unlicense (Unlicense)|
 |flake8|6.0.0|MIT|
 |gitdb|4.0.10|BSD|
-|GitPython|3.1.31|BSD|
+|GitPython|3.1.32|BSD|
 |identify|2.5.24|MIT|
 |iniconfig|2.0.0|MIT|
 |isort|5.12.0|MIT|
@@ -25,7 +25,7 @@
 |packaging|23.1|Apache 2.0<br/>BSD|
 |pathspec|0.11.1|Mozilla Public License 2.0 (MPL 2.0)|
 |pbr|5.11.1|Apache 2.0|
-|platformdirs|3.8.0|MIT|
+|platformdirs|3.8.1|MIT|
 |pluggy|1.2.0|MIT|
 |pre-commit|3.3.3|MIT|
 |pycodestyle|2.10.0|MIT|
