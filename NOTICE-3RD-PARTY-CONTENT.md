@@ -6,14 +6,14 @@
 |bandit|1.7.5|Apache 2.0|
 |black|23.7.0|MIT|
 |cfgv|3.3.1|MIT|
-|click|8.1.4|New BSD|
-|distlib|0.3.6|Python Software Foundation License|
+|click|8.1.6|New BSD|
+|distlib|0.3.7|Python Software Foundation License|
 |exceptiongroup|1.1.2|MIT|
 |filelock|3.12.2|The Unlicense (Unlicense)|
 |flake8|6.0.0|MIT|
 |gitdb|4.0.10|BSD|
 |GitPython|3.1.32|BSD|
-|identify|2.5.24|MIT|
+|identify|2.5.25|MIT|
 |iniconfig|2.0.0|MIT|
 |isort|5.12.0|MIT|
 |markdown-it-py|3.0.0|MIT|
@@ -25,7 +25,7 @@
 |packaging|23.1|Apache 2.0<br/>BSD|
 |pathspec|0.11.1|Mozilla Public License 2.0 (MPL 2.0)|
 |pbr|5.11.1|Apache 2.0|
-|platformdirs|3.8.1|MIT|
+|platformdirs|3.9.1|MIT|
 |pluggy|1.2.0|MIT|
 |pre-commit|3.3.3|MIT|
 |pycodestyle|2.10.0|MIT|
@@ -33,7 +33,7 @@
 |pyflakes|3.0.1|MIT|
 |Pygments|2.15.1|Simplified BSD|
 |pytest|7.4.0|MIT|
-|PyYAML|6.0|MIT|
+|PyYAML|6.0.1|MIT|
 |rich|13.4.2|MIT|
 |setuptools|58.1.0|MIT|
 |smmap|5.0.0|BSD|
@@ -41,7 +41,7 @@
 |stevedore|5.1.0|Apache 2.0|
 |tomli|2.0.1|MIT|
 |typing-extensions|4.7.1|Python Software Foundation License|
-|virtualenv|20.23.1|MIT|
+|virtualenv|20.24.1|MIT|
 ## Workflows
 | Dependency | Version | License |
 |:-----------|:-------:|--------:|
