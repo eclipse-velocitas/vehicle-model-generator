@@ -21,9 +21,11 @@ python3 gen_vehicle_model.py <path_to_your_json_file>
 ```
 ### Example
 ```bash
-git clone -b release/3.0 https://github.com/COVESA/vehicle_signal_specification.git
+git clone -b v3.1 https://github.com/COVESA/vehicle_signal_specification.git
 python3 gen_vehicle_model.py -I ./vehicle_signal_specification/spec ./vehicle_signal_specification/spec/VehicleSignalSpecification.vspec
 ```
+> **Note**<br>
+> Vehicle-model-generator only supports vss versions up to v3.1, newest versions will be supported soon.
 
 Or use VSCode Launch: Press ```F5```, select ```Python``` or ```cpp```.
 
