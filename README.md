@@ -21,7 +21,7 @@ python3 gen_vehicle_model.py <path_to_your_json_file>
 ```
 ### Example
 ```bash
-git clone https://github.com/COVESA/vehicle_signal_specification.git
+git clone -b release/3.0 https://github.com/COVESA/vehicle_signal_specification.git
 python3 gen_vehicle_model.py -I ./vehicle_signal_specification/spec ./vehicle_signal_specification/spec/VehicleSignalSpecification.vspec
 ```
 
