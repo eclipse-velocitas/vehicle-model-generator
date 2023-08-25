@@ -20,7 +20,14 @@ from typing import List
 # Until vsspec issue will be fixed: https://github.com/COVESA/vss-tools/issues/208
 import vspec  # type: ignore
 
-from sdv.model_generator.tree_generator.constants import JSON, VSPEC
+from sdv.model_generator.tree_generator.constants import (
+    JSON,
+    VSPEC,
+    VSS_KEY_CHILDREN,
+    VSS_KEY_EXPANDED,
+    VSS_KEY_FILENAME,
+    VSS_KEY_INSTANCES,
+)
 
 # supported file formats
 formats = [VSPEC, JSON]
@@ -76,21 +83,12 @@ class Json(FileFormat):
     def __init__(self, file_path: str):
         super().__init__(file_path)
 
-    # VSS nodes have a field "$file_name",
-    # so it needs to be added for the vss-tools to work
-    def __extend_fields(self, node: dict):
-        if "children" in node:
-            for child in node["children"].values():
-                self.__extend_fields(child)
-        node["$file_name$"] = ""
-        return
-
     # Do a simple comparison of children names for now
     def __match(self, d1: dict, d2: dict):
         return d1.keys() == d2.keys()
 
     def __is_expanded(self, d: dict):
-        return "expanded" in d and d["expanded"]
+        return VSS_KEY_EXPANDED in d and d[VSS_KEY_EXPANDED]
 
     def __to_instance_description(self, instances):
         assert instances
@@ -134,41 +132,45 @@ class Json(FileFormat):
             instance_list.append(self.__to_instance_description(instance_set))
         return instance_list
 
+    def __get_children(self, node: dict):
+        if VSS_KEY_CHILDREN in node:
+            return node[VSS_KEY_CHILDREN]
+        return {}
+
     def __get_common_archetype_of_children(self, node: dict):
         common_archetype = None
         instances: list[list] = []
 
-        if "children" in node:
-            this_instances = []
-            for child_name, child_attrs in node["children"].items():
-                (archetype, sub_instances) = self.__collapse_instances(child_attrs)
-                if archetype:
-                    if common_archetype is None:
-                        common_archetype = archetype
-                        archetype_giver = child_name
-                    elif not self.__match(archetype, common_archetype):
-                        raise ExpansionMismatch(
-                            f"Nodes '{archetype_giver}' and '{child_name}' "
-                            "contain diverging expanded children"
-                        )
-                    if sub_instances:
-                        if not instances:
-                            instances = sub_instances
-                        elif sub_instances != instances:
-                            raise ExpansionMismatch(
-                                f"Nodes '{archetype_giver}' and '{child_name}' "
-                                "have diverging nested instances:\n"
-                                f"{instances} and {sub_instances}"
-                            )
-                    elif instances:
+        this_instances = []
+        for child_name, child_attrs in self.__get_children(node).items():
+            (archetype, sub_instances) = self.__collapse_instances(child_attrs)
+            if archetype:
+                if common_archetype is None:
+                    common_archetype = archetype
+                    archetype_giver = child_name
+                elif not self.__match(archetype, common_archetype):
+                    raise ExpansionMismatch(
+                        f"Nodes '{archetype_giver}' and '{child_name}' "
+                        "contain diverging expanded children"
+                    )
+                if sub_instances:
+                    if not instances:
+                        instances = sub_instances
+                    elif sub_instances != instances:
                         raise ExpansionMismatch(
                             f"Nodes '{archetype_giver}' and '{child_name}' "
                             "have diverging nested instances:\n"
                             f"{instances} and {sub_instances}"
                         )
-                    this_instances.append(child_name)
-            if this_instances:
-                instances.insert(0, this_instances)
+                elif instances:
+                    raise ExpansionMismatch(
+                        f"Nodes '{archetype_giver}' and '{child_name}' "
+                        "have diverging nested instances:\n"
+                        f"{instances} and {sub_instances}"
+                    )
+                this_instances.append(child_name)
+        if this_instances:
+            instances.insert(0, this_instances)
 
         return (common_archetype, instances)
 
@@ -177,34 +179,42 @@ class Json(FileFormat):
 
         if self.__is_expanded(node):
             if not common_archetype:
-                common_archetype = node["children"]
+                common_archetype = node[VSS_KEY_CHILDREN]
             return (common_archetype, instances)
 
         if common_archetype:
             # Remove expanded children
             for child_name in instances[0]:
-                del node["children"][child_name]
+                del node[VSS_KEY_CHILDREN][child_name]
 
             if self.__is_expanded(node):
                 # if this layer is also an expanded one, in the layer below
                 # no children must be left
-                if node["children"]:
+                if node[VSS_KEY_CHILDREN]:
                     raise ExpansionMismatch(
                         f'Node "{child_name}" has children other than instances:\n'
-                        + node["children"]
+                        + node[VSS_KEY_CHILDREN]
                     )
             else:
                 # if this layer is not an expanded one, the children of the
                 # common_archetype needs to become children of this layer ...
-                node["children"] |= common_archetype
+                node[VSS_KEY_CHILDREN] |= common_archetype
 
                 # ... and we need to genrate the list of instances
-                node["instances"] = self.__generate_instance_list(instances)
+                node[VSS_KEY_INSTANCES] = self.__generate_instance_list(instances)
 
                 common_archetype = None
                 instances = []
 
         return (common_archetype, instances)
+
+    # VSS nodes have a field "$file_name",
+    # so it needs to be added for the vss-tools to work
+    def __extend_fields(self, node: dict):
+        for child in self.__get_children(node).values():
+            self.__extend_fields(child)
+        node[VSS_KEY_FILENAME] = ""
+        return
 
     def load_tree(self):
         print("Loading json...")

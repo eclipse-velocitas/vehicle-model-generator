@@ -14,3 +14,8 @@
 
 VSPEC = "vspec"
 JSON = "json"
+
+VSS_KEY_CHILDREN = "children"
+VSS_KEY_INSTANCES = "instances"
+VSS_KEY_EXPANDED = "expanded"
+VSS_KEY_FILENAME = "$file_name$"
