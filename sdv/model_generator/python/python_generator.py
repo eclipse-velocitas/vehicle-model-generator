@@ -105,7 +105,7 @@ class VehicleModelPythonGenerator:
 
     def __gen_imports(self):
         self.model_imports.add("Model")
-        self.ctx.write("from sdv.model import (\n")
+        self.ctx.write("from velocitas_sdk.model import (\n")
         self.ctx.indent()
         for imp in sorted(self.model_imports):
             self.ctx.write(f"{imp},\n")
