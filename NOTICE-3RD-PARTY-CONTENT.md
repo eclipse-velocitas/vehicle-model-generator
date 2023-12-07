@@ -13,7 +13,7 @@
 |flake8|6.1.0|MIT|
 |gitdb|4.0.11|BSD|
 |GitPython|3.1.40|BSD|
-|identify|2.5.32|MIT|
+|identify|2.5.33|MIT|
 |iniconfig|2.0.0|MIT|
 |isort|5.12.0|MIT|
 |markdown-it-py|3.0.0|MIT|
@@ -25,7 +25,7 @@
 |packaging|23.2|Apache 2.0<br/>BSD|
 |pathspec|0.11.2|Mozilla Public License 2.0 (MPL 2.0)|
 |pbr|6.0.0|Apache 2.0|
-|platformdirs|4.0.0|MIT|
+|platformdirs|4.1.0|MIT|
 |pluggy|1.3.0|MIT|
 |pre-commit|3.5.0|MIT|
 |pycodestyle|2.11.1|MIT|
@@ -41,7 +41,7 @@
 |stevedore|5.1.0|Apache 2.0|
 |tomli|2.0.1|MIT|
 |typing-extensions|4.8.0|Python Software Foundation License|
-|virtualenv|20.24.7|MIT|
+|virtualenv|20.25.0|MIT|
 ## Workflows
 | Dependency | Version | License |
 |:-----------|:-------:|--------:|
