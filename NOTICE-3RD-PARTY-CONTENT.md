@@ -45,5 +45,5 @@
 ## Workflows
 | Dependency | Version | License |
 |:-----------|:-------:|--------:|
-|actions/checkout|v3|MIT License|
+|actions/checkout|v4|MIT License|
 |pre-commit/action|v3.0.0|MIT License|
