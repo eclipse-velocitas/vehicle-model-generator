@@ -1,5 +1,5 @@
 pytest>=2.7.2
-pre-commit
+pre-commit>=3.5.0
 pydocstyle
 black
 isort
