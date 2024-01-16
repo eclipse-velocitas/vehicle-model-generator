@@ -16,10 +16,9 @@ import json
 from abc import abstractmethod
 from typing import List
 
-# Until vsspec issue will be fixed: https://github.com/COVESA/vss-tools/issues/208
 import vspec  # type: ignore
 
-from sdv.model_generator.tree_generator.constants import JSON, VSPEC
+from velocitas.model_generator.tree_generator.constants import JSON, VSPEC
 
 # supported file formats
 formats = [VSPEC, JSON]
@@ -36,7 +35,9 @@ class FileFormat:
 
 
 class Vspec(FileFormat):
-    def __init__(self, file_path: str, include_dirs: List, strict, overlays):
+    def __init__(
+        self, file_path: str, include_dirs: List, strict: bool, overlays: List[str]
+    ):
         super().__init__(file_path)
         self.include_dirs = include_dirs
         self.strict = strict

@@ -12,16 +12,11 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-sudo chmod +x .devcontainer/scripts/*.sh
-sudo chown -R $(whoami) $HOME
+/bin/bash /tmp/scripts/configure-proxies.sh
 
-echo "#######################################################"
-echo "### Executing add-python.sh                         ###"
-echo "#######################################################"
-.devcontainer/scripts/add-python.sh 2>&1 | tee -a $HOME/add-python.log
-
+pip3 install -r ./requirements-dev.txt
 pip3 install -r ./requirements.txt
-pip3 install -r ./requirements-vss.txt
+pip3 install -e .
 
 # add repo to git safe.directory
 REPO=$(pwd)

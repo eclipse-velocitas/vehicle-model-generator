@@ -12,8 +12,8 @@
             "program": "${workspaceFolder}/gen_vehicle_model.py",
             "console": "internalConsole",
             "args": [
-                "-T", "sdv_model",
-                "-N", "sdv_model",
+                "-T", "velocitas_model",
+                "-N", "velocitas_model",
                 "-l", "${input:languageId}",
                 "-I", "./vehicle_signal_specification/spec",
                 "./vehicle_signal_specification/spec/VehicleSignalSpecification.vspec"

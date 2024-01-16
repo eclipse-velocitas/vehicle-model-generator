@@ -50,6 +50,7 @@ coverage.xml
 *.py,cover
 .hypothesis/
 .pytest_cache/
+.ruff_cache/
 
 # Translations
 *.mo
@@ -130,10 +131,14 @@ dmypy.json
 
 # Generated vehicle model
 output/
-sdv_model/
+velocitas_model/
+out/
 
 # VSS Submodule
 vehicle_signal_specification/
+
+# test reports
+results/
 
 # macOS specific
 .DS_Store

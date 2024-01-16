@@ -20,7 +20,7 @@ from typing import List
 # Until vsspec issue will be fixed: https://github.com/COVESA/vss-tools/issues/208
 from vspec.model.vsstree import VSSNode  # type: ignore
 
-from sdv.model_generator.utils import CodeGeneratorContext
+from velocitas.model_generator.utils import CodeGeneratorContext
 
 _COLLECTION_SUFFIX = "Collection"
 _COLLECTION_REG_EX = r"\w+\[\d+,(\d+)\]"
