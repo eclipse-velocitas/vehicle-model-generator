@@ -8,6 +8,7 @@ This generator creates a vehicle model from the given vspec specification for th
 ## Supported languages
 
 * Python 3
+* C++
 
 ## Usage
 
