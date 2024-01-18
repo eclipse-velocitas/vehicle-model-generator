@@ -17,7 +17,9 @@
 """CLI entry point for the model generator."""
 
 import argparse
+
 import vspec  # type: ignore
+
 from velocitas.model_generator import generate_model
 
 
@@ -110,3 +112,7 @@ def main():
         ext_attributes_list,
         args.overlays,
     )
+
+
+if __name__ == "__main__":
+    main()

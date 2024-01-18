@@ -99,3 +99,6 @@ jobs:
           hide_complexity: true
           indicators: true
           output: both
+
+      - run: |
+          cat code-coverage-results.md >> $GITHUB_STEP_SUMMARY

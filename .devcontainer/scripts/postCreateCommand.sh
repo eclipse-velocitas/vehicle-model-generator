@@ -12,8 +12,6 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-/bin/bash /tmp/scripts/configure-proxies.sh
-
 pip3 install -r ./requirements-dev.txt
 pip3 install -r ./requirements.txt
 pip3 install -e .
