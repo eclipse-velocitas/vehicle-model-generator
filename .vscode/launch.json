@@ -9,18 +9,28 @@
             "type": "python",
             "request": "launch",
             "name": "gen-vehicle-model",
-            "program": "${workspaceFolder}/gen_vehicle_model.py",
+            "program": "${workspaceFolder}/src/velocitas/model_generator/cli.py",
             "console": "internalConsole",
             "args": [
-                "-T", "sdv_model",
-                "-N", "sdv_model",
+                "-T", "velocitas_model",
+                "-N", "velocitas_model",
                 "-l", "${input:languageId}",
-                "-I", "./vehicle_signal_specification/spec",
-                "./vehicle_signal_specification/spec/VehicleSignalSpecification.vspec"
+                "-I", "${input:includeDir}",
+                "${input:inputFilePath}"
             ]
         }
     ],
     "inputs": [
+        {
+            "type":"promptString",
+            "id": "inputFilePath",
+            "description": "Path to the main input file. Either .vspec or .json."
+        },
+        {
+            "type": "promptString",
+            "id": "includeDir",
+            "description": "Included directories for a vspec tree."
+        },
         {
             "type": "pickString",
             "id": "languageId",

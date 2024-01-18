@@ -22,11 +22,7 @@ SPDX-License-Identifier: Apache-2.0
 | :--------: | :------------------------------------------------------------------: |
 | Pre-Commit | https://github.com/pre-commit/pre-commit/blob/main/LICENSE           |
 | Mypy       | https://github.com/python/mypy/blob/master/LICENSE                   |
-| Black      | https://github.com/psf/black/blob/main/LICENSE                       |
-| Bandit     | https://github.com/PyCQA/bandit/blob/main/LICENSE                    |
-| flake8     | https://github.com/PyCQA/flake8/blob/main/LICENSE                    |
-| isort      | https://github.com/PyCQA/isort/blob/main/LICENSE                     |
-| Pydocstyle | https://github.com/PyCQA/pydocstyle/blob/master/LICENSE-MIT          |
+| Ruff       | https://raw.githubusercontent.com/astral-sh/ruff/main/LICENSE        |
 
 
 ### Further 3rd party licenses used in project

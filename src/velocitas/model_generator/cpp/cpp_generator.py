@@ -23,8 +23,8 @@ from typing import List, Set
 from vspec.model.constants import VSSType  # type: ignore
 from vspec.model.vsstree import VSSNode  # type: ignore
 
-from sdv.model_generator.cpp.cpp_keywords import cpp_keywords
-from sdv.model_generator.utils import CodeGeneratorContext, camel_to_snake_case
+from velocitas.model_generator.cpp.cpp_keywords import cpp_keywords
+from velocitas.model_generator.utils import CodeGeneratorContext, camel_to_snake_case
 
 
 class VehicleModelCppGenerator:
@@ -208,7 +208,7 @@ class VehicleModelCppGenerator:
         elif name.startswith("NamedRange"):
             name = values[0]
             ctor_params = "std::string name, ParentClass* parent"
-            ctor_initializer_list.append(f"ParentClass(name, parent)")
+            ctor_initializer_list.append("ParentClass(name, parent)")
             class_name = f"{name}Type"
 
             min_value = values[1]

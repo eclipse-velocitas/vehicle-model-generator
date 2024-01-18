@@ -12,13 +12,9 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-FROM ubuntu:20.04
+FROM ghcr.io/eclipse-velocitas/devcontainer-base-images/python:v0.2
 
 ENV DOCKER_BUILDKIT=1
-
-# Fix for bug in devcontainer features
-ADD https://raw.githubusercontent.com/devcontainers/features/7fa90110d762797cc0b1c2fe8fcc028c9b813d56/src/common-utils/install.sh /tmp/scripts/install-common.sh
-RUN UID="4000" bash /tmp/scripts/install-common.sh
 
 COPY scripts/*.sh /tmp/scripts/
 RUN find /tmp/scripts/ -type f -iname "*.sh" -exec chmod +x {} \;

@@ -15,8 +15,8 @@
 import os
 from typing import List
 
-from sdv.model_generator.tree_generator.constants import JSON, VSPEC
-from sdv.model_generator.tree_generator.file_formats import Json, Vspec, formats
+from velocitas.model_generator.tree_generator.constants import JSON, VSPEC
+from velocitas.model_generator.tree_generator.file_formats import Json, Vspec, formats
 
 
 # if no other file supported format is found
@@ -31,7 +31,9 @@ class UnsupportedFileFormat(Exception):
 
 
 class FileImport:
-    def __init__(self, file_path: str, include_dirs: List, strict, overlays):
+    def __init__(
+        self, file_path: str, include_dirs: List[str], strict: bool, overlays: List[str]
+    ):
         self.file_path = file_path
         self.include_dirs = include_dirs
         self.strict = strict

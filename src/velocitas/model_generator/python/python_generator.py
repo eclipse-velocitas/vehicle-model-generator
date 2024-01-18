@@ -22,8 +22,8 @@ from typing import List, Set
 from vspec.model.constants import VSSType  # type: ignore
 from vspec.model.vsstree import VSSNode  # type: ignore
 
-from sdv.model_generator.python.vss_collection import VssCollection
-from sdv.model_generator.utils import CodeGeneratorContext
+from velocitas.model_generator.python.vss_collection import VssCollection
+from velocitas.model_generator.utils import CodeGeneratorContext
 
 
 class VehicleModelPythonGenerator:

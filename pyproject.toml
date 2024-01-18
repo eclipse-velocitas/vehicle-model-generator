@@ -1,0 +1,18 @@
+[project]
+name = "velocitas_model_generator"
+description = "Generates a language-specific data model out of VSS vspec files"
+dynamic = ["version"]
+requires-python = ">= 3.10"
+readme = "README.md"
+license = {file = "LICENSE"}
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
+
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[project.scripts]
+gen-model = "velocitas.model_generator.cli:main"

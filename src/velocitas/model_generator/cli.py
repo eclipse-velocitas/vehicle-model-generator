@@ -14,20 +14,13 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-"""Convert all vspec input files to Velocitas Python Vehicle Model."""
+"""CLI entry point for the model generator."""
 
 import argparse
-import sys
 
-# Until vsspec issue will be fixed: https://github.com/COVESA/vss-tools/issues/208
 import vspec  # type: ignore
 
-from sdv.model_generator.cpp.cpp_generator import VehicleModelCppGenerator
-from sdv.model_generator.python.python_generator import VehicleModelPythonGenerator
-from sdv.model_generator.tree_generator.file_import import (
-    FileImport,
-    UnsupportedFileFormat,
-)
+from velocitas.model_generator import generate_model
 
 
 def main():
@@ -102,13 +95,6 @@ def main():
 
     args = parser.parse_args()
 
-    strict = args.strict
-
-    include_dirs = ["."]
-    include_dirs.extend(args.include_dir)
-
-    # yaml_out = open(args.yaml_file, "w", encoding="utf-8")
-
     ext_attributes_list = args.extended_attributes.split(",")
     if len(ext_attributes_list) > 0:
         vspec.model.vsstree.VSSNode.whitelisted_extended_attributes = (
@@ -116,35 +102,16 @@ def main():
         )
         print(f"Known extended attributes: {', '.join(ext_attributes_list)}")
 
-    try:
-        tree = FileImport(
-            args.input_file_path, include_dirs, strict, args.overlays
-        ).load_tree()
-
-        if args.language == "python":
-            print("Recursing tree and creating Python code...")
-            VehicleModelPythonGenerator(
-                tree,
-                args.target_folder,
-                args.name,
-            ).generate()
-            print("All done.")
-        elif args.language == "cpp":
-            print("Recursing tree and creating c++ code...")
-            VehicleModelCppGenerator(
-                tree,
-                args.target_folder,
-                args.name,
-            ).generate()
-            print("All done.")
-        else:
-            print(f"Language {args.language} is not supported yet.")
-    except vspec.VSpecError as e:
-        print(f"Error: {e}")
-        sys.exit(255)
-    except UnsupportedFileFormat as e:
-        print(f"Error: {e}")
-        sys.exit(255)
+    generate_model(
+        args.input_file_path,
+        args.language,
+        args.target_folder,
+        args.name,
+        args.strict,
+        args.include_dir,
+        ext_attributes_list,
+        args.overlays,
+    )
 
 
 if __name__ == "__main__":

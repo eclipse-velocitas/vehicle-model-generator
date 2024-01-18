@@ -1,8 +1,1 @@
-pytest>=2.7.2
-pre-commit>=3.5.0
-pydocstyle
-black
-isort
-mypy
-bandit
-flake8
+git+https://github.com/covesa/vss-tools@v3.0
