@@ -160,7 +160,7 @@ class VssCollection:
                 f'raise IndexError(f"Index {{index}} is out of range [1, {count}]")\n'
             )
             body_ctx.dedent()
-            body_ctx.write("_options = {{\n")
+            body_ctx.write("_options = {\n")
             body_ctx.indent()
 
             for index in range(len(instances)):

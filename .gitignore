@@ -134,8 +134,8 @@ output/
 velocitas_model/
 out/
 
-# VSS Submodule
-vehicle_signal_specification/
+# test data repos
+tests/data/vspec
 
 # test reports
 results/
