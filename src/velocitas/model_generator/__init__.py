@@ -47,8 +47,8 @@ from velocitas.model_generator.tree_generator.file_import import (
 def generate_model(
     input_file_path: str,
     language: str,
-    target_folder: str,
-    name: str,
+    target_folder: str = "./gen_model",
+    name: str = "vehicle",
     strict: bool = True,
     include_dir: str = ".",
     ext_attributes_list: List[str] = [],

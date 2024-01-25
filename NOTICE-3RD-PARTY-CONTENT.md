@@ -15,7 +15,7 @@
 |nodeenv|1.8.0|BSD|
 |packaging|23.2|Apache 2.0<br/>BSD|
 |platformdirs|4.1.0|MIT|
-|pluggy|1.3.0|MIT|
+|pluggy|1.4.0|MIT|
 |pre-commit|3.6.0|MIT|
 |pytest|7.4.4|MIT|
 |pytest-cov|4.1.0|MIT|
