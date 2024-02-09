@@ -133,6 +133,7 @@ dmypy.json
 output/
 velocitas_model/
 out/
+gen_model/
 
 # test data repos
 tests/data/vspec

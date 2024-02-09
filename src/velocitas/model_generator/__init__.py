@@ -30,8 +30,11 @@
 
 """Convert all vspec input files to Velocitas Python Vehicle Model."""
 
+import os
+import shutil
 import sys
 from typing import List
+
 import vspec  # type: ignore
 
 from velocitas.model_generator.cpp.cpp_generator import VehicleModelCppGenerator
@@ -66,6 +69,9 @@ def generate_model(
         print(f"Known extended attributes: {', '.join(ext_attributes_list)}")
 
     try:
+        if os.path.exists(target_folder):
+            shutil.rmtree(target_folder)
+
         tree = FileImport(input_file_path, include_dirs, strict, overlays).load_tree()
 
         if language == "python":

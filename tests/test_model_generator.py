@@ -33,11 +33,12 @@ test_data_base_path = Path(__file__).parent.joinpath("data")
 )
 def test_generate(language: str, input_file_path: str, include_dir: str):
     input_file_path = Path(__file__).parent.joinpath("data", input_file_path).__str__()
-    generate_model(input_file_path, language, "output", "vehicle")
+    generate_model(
+        input_file_path, language, "output", "vehicle", include_dir=include_dir
+    )
 
     if language == "python":
         subprocess.check_call([sys.executable, "-m", "pip", "install", "./output"])
         assert compileall.compile_dir("./output", force=True)
     elif language == "cpp":
-        # TODO: add a check if the package can be installed after generated model is a conan package
-        pass
+        subprocess.check_call(["conan", "export", "./output"])

@@ -34,7 +34,9 @@ class VehicleModelCppGenerator:
         """Initialize the c++ generator.
 
         Args:
-            root (_type_): the vspec tree root node.
+            root_node (VSSNode): The root node of the VSS tree
+            target_folder (str): The path to the output folder
+            root_namespace (str): The root namespace to use to which VSS based namespaces will be appended
         """
         self.root_node = root_node
         self.target_folder = target_folder
@@ -65,6 +67,31 @@ class VehicleModelCppGenerator:
 
         self.__gen_model(self.root_node, self.root_namespace_list, is_root=True)
         self.__visit_nodes(self.root_node, self.root_namespace_list)
+        # self.__gen_cmake_project()
+        self.__gen_conan_package()
+
+    def __gen_conan_package(self):
+        path = os.path.join(self.target_folder, "conanfile.py")
+        with open(path, "w", encoding="utf-8") as file:
+            file.write(
+                """from conans import ConanFile
+
+class VehicleModelConan(ConanFile):
+    name = "vehicle-model"
+    version = "generated"
+    license = "Apache 2.0"
+    url = "https://github.com/eclipse-velocitas/vehicle-model-generator"
+    description = "Vehicle Model API auto-generated from Vehicle Signal Specification"
+    # No settings/options are necessary, this is header only
+    exports_sources = "include/*"
+    no_copy_source = True
+    # all SDK versions are supported at the moment
+    requires = "vehicle-app-sdk/[>=0.1]"
+
+    def package(self):
+        self.copy("*.hpp")
+"""
+            )
 
     def __visit_nodes(self, node: VSSNode, parent_namespace_list: List[str]):
         """Recursively render nodes."""
@@ -371,12 +398,12 @@ class VehicleModelCppGenerator:
 
         self.__gen_footer(namespace_list, node)
 
+        relative_header_path = os.path.join(
+            *self.__to_folder_names(namespace_list), f"{node.name}.hpp"
+        )
+
         with open(
-            os.path.join(
-                self.root_path,
-                *self.__to_folder_names(namespace_list),
-                f"{node.name}.hpp",
-            ),
+            os.path.join(self.root_path, relative_header_path),
             "w",
             encoding="utf-8",
         ) as file:
