@@ -16,7 +16,6 @@
 
 import os
 import re
-import shutil
 from typing import List, Set
 
 # Until vsspec issue will be fixed: https://github.com/COVESA/vss-tools/issues/208
@@ -61,8 +60,7 @@ class VehicleModelCppGenerator:
         path = os.path.join(
             self.root_path, *self.__to_folder_names(self.root_namespace_list)
         )
-        if os.path.exists(path):
-            shutil.rmtree(path)
+
         os.makedirs(path)
 
         self.__gen_model(self.root_node, self.root_namespace_list, is_root=True)
