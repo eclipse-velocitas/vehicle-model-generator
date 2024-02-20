@@ -12,7 +12,7 @@ This generator creates a vehicle model from the given vspec specification for th
 
 ## Usage
 
-Invoke the `src/velocitas/model_generator/cli.py` script with the path to the vspec or json file you wish to generate code for, additionally passing include pathes to directories which contain referenced vspec files:
+Invoke the `src/velocitas/model_generator/cli.py` script with the path to the vspec or json file you wish to generate code for, additionally passing include pathes to directories which contain referenced vspec files. You need a `units.yaml` in the same directory. If you want to use the default one see [here](https://github.com/COVESA/vehicle_signal_specification/blob/master/spec/units.yaml). For stability use release branch with tags. For example branch `release/4.0`.
 ```bash
 python3 src/velocitas/model_generator/cli.py -I <path_to_dir_with_included_vspec_files> <path_to_your_vspec_file>
 ```
@@ -25,8 +25,6 @@ python3 src/velocitas/model_generator/cli.py <path_to_your_json_file>
 git clone -b v3.1 https://github.com/COVESA/vehicle_signal_specification.git
 python3 src/velocitas/model_generator/cli.py -I ./vehicle_signal_specification/spec ./vehicle_signal_specification/spec/VehicleSignalSpecification.vspec
 ```
-> **Note**<br>
-> Vehicle-model-generator only supports vss versions up to v3.1, newest versions will be supported soon.
 
 Or use VSCode Launch: Press ```F5```, select ```Python``` or ```cpp``` and pass in the include directory and input file path.
 

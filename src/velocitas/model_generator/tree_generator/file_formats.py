@@ -13,6 +13,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import json
+import os
 from abc import abstractmethod
 from typing import List
 
@@ -45,13 +46,14 @@ class Vspec(FileFormat):
 
     def load_tree(self):
         print("Loading vspec...")
+        vspec.load_units(self.file_path, list())
         tree = vspec.load_tree(
             self.file_path,
             self.include_dirs,
-            merge_private=False,
-            break_on_unknown_attribute=self.strict,
+            tree_type=vspec.VSSTreeType.SIGNAL_TREE,
             break_on_name_style_violation=self.strict,
             expand_inst=False,
+            data_type_tree=vspec.VSSTreeType.DATA_TYPE_TREE,
         )
 
         for overlay in self.overlays:
@@ -86,5 +88,6 @@ class Json(FileFormat):
         output_json = json.load(open(self.file_path))
         self.__extend_fields(next(iter(output_json.values())))
         print("Generating tree from json...")
-        tree = vspec.render_tree(output_json)
+        vspec.load_units(self.file_path, list())
+        tree = vspec.render_tree(output_json, vspec.VSSTreeType.SIGNAL_TREE)
         return tree
