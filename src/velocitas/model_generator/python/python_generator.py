@@ -15,7 +15,6 @@
 """VehicleModelPythonGenerator."""
 
 import os
-import shutil
 from typing import List, Set
 
 # Until vsspec issue will be fixed: https://github.com/COVESA/vss-tools/issues/208
@@ -52,8 +51,6 @@ class VehicleModelPythonGenerator:
         """Generate python code for vehicle model."""
         self.root_path = self.target_folder
 
-        if os.path.exists(self.root_path):
-            shutil.rmtree(self.root_path)
         path = os.path.join(self.root_path, *self.root_package_list)
         os.makedirs(path)
 

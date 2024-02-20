@@ -4,21 +4,14 @@
 | Dependency | Version | License |
 |:-----------|:-------:|--------:|
 |cfgv|3.4.0|MIT|
-|coverage|7.4.0|Apache 2.0|
 |distlib|0.3.8|Python Software Foundation License|
-|exceptiongroup|1.2.0|MIT|
 |filelock|3.13.1|The Unlicense (Unlicense)|
-|identify|2.5.33|MIT|
-|iniconfig|2.0.0|MIT|
+|identify|2.5.34|MIT|
 |mypy|1.8.0|MIT|
 |mypy-extensions|1.0.0|MIT|
 |nodeenv|1.8.0|BSD|
-|packaging|23.2|Apache 2.0<br/>BSD|
-|platformdirs|4.1.0|MIT|
-|pluggy|1.4.0|MIT|
-|pre-commit|3.6.0|MIT|
-|pytest|7.4.4|MIT|
-|pytest-cov|4.1.0|MIT|
+|platformdirs|4.2.0|MIT|
+|pre-commit|3.6.1|MIT|
 |PyYAML|6.0.1|MIT|
 |setuptools|58.1.0|MIT|
 |tomli|2.0.1|MIT|
