@@ -13,7 +13,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import json
-import os
 from abc import abstractmethod
 from typing import List
 
