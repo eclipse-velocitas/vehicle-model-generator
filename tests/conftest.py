@@ -39,3 +39,4 @@ def prepare_vss_repo_data(tag: str) -> None:
 
 def pytest_configure(config) -> None:
     prepare_vss_repo_data("v3.0")
+    prepare_vss_repo_data("v4.0")
