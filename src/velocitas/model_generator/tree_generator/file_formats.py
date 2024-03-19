@@ -35,24 +35,36 @@ class FileFormat:
 
 
 class Vspec(FileFormat):
+
     def __init__(
-        self, file_path: str, include_dirs: List, strict: bool, overlays: List[str]
+        self,
+        file_path: str,
+        unit_file_path: str,
+        include_dirs: List,
+        strict: bool,
+        overlays: List[str],
     ):
         super().__init__(file_path)
+        self.unit_file_path = unit_file_path
         self.include_dirs = include_dirs
         self.strict = strict
         self.overlays = overlays
 
     def load_tree(self):
         print("Loading vspec...")
-        vspec.load_units(self.file_path, list())
+        vspec.load_units(
+            self.file_path,
+            [
+                self.unit_file_path,
+            ],
+        )
         tree = vspec.load_tree(
             self.file_path,
             self.include_dirs,
             tree_type=vspec.VSSTreeType.SIGNAL_TREE,
             break_on_name_style_violation=self.strict,
             expand_inst=False,
-            data_type_tree=vspec.VSSTreeType.DATA_TYPE_TREE,
+            data_type_tree=vspec.VSSTreeType.SIGNAL_TREE,
         )
 
         for overlay in self.overlays:
@@ -70,8 +82,10 @@ class Vspec(FileFormat):
 
 
 class Json(FileFormat):
-    def __init__(self, file_path: str):
+
+    def __init__(self, file_path: str, unit_file_path: str):
         super().__init__(file_path)
+        self.unit_file_path = unit_file_path
 
     # VSS nodes have a field "$file_name",
     # so it needs to be added for the vss-tools to work
@@ -87,6 +101,11 @@ class Json(FileFormat):
         output_json = json.load(open(self.file_path))
         self.__extend_fields(next(iter(output_json.values())))
         print("Generating tree from json...")
-        vspec.load_units(self.file_path, list())
+        vspec.load_units(
+            self.file_path,
+            [
+                self.unit_file_path,
+            ],
+        )
         tree = vspec.render_tree(output_json, vspec.VSSTreeType.SIGNAL_TREE)
         return tree

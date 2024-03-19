@@ -79,6 +79,13 @@ def main():
         " appear.",
     )
     parser.add_argument(
+        "-u",
+        "--units",
+        type=str,
+        default="",
+        help="The file location of units file. If left empty it tries downloading default units file from https://github.com/COVESA/vehicle_signal_specification/blob/v4.0/spec/units.yaml.",
+    )
+    parser.add_argument(
         "-e",
         "--extended-attributes",
         type=str,
@@ -104,6 +111,7 @@ def main():
 
     generate_model(
         args.input_file_path,
+        args.units,
         args.language,
         args.target_folder,
         args.name,

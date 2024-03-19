@@ -35,6 +35,8 @@ import shutil
 import sys
 from typing import List
 
+import requests
+
 import vspec  # type: ignore
 
 from velocitas.model_generator.cpp.cpp_generator import VehicleModelCppGenerator
@@ -49,6 +51,7 @@ from velocitas.model_generator.tree_generator.file_import import (
 
 def generate_model(
     input_file_path: str,
+    input_unit_file_path: str,
     language: str,
     target_folder: str = "./gen_model",
     name: str = "vehicle",
@@ -59,6 +62,19 @@ def generate_model(
 ) -> None:
     include_dirs = ["."]
     include_dirs.extend(include_dir)
+
+    # try downloading deafult unit file if none is specified
+    if input_unit_file_path == "":
+        uri = "https://github.com/COVESA/vehicle_signal_specification/blob/v4.0/spec/units.yaml"
+        input_unit_file_path = os.path.join(
+            os.path.dirname(input_file_path), "units.yaml"
+        )
+        print(f"Downloading default units file to {input_unit_file_path} ...")
+        with requests.get(uri) as infile:
+            os.makedirs(os.path.split(input_unit_file_path)[0], exist_ok=True)
+            with open(input_unit_file_path, "w") as outfile:
+                for item in infile.json()["payload"]["blob"]["rawLines"]:
+                    outfile.write(f"{item} \n")
 
     # yaml_out = open(args.yaml_file, "w", encoding="utf-8")
 
@@ -72,7 +88,13 @@ def generate_model(
         if os.path.exists(target_folder):
             shutil.rmtree(target_folder)
 
-        tree = FileImport(input_file_path, include_dirs, strict, overlays).load_tree()
+        tree = FileImport(
+            input_file_path,
+            input_unit_file_path,
+            include_dirs,
+            strict,
+            overlays,
+        ).load_tree()
 
         if language == "python":
             print("Recursing tree and creating Python code...")
