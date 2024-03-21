@@ -83,7 +83,8 @@ def main():
         "--units",
         type=str,
         default="",
-        help="The file location of units file. If left empty it tries downloading default units file from https://github.com/COVESA/vehicle_signal_specification/blob/v4.0/spec/units.yaml.",
+        help="The file locations of units files as comma separated list."
+        "If left empty it tries downloading default units file from https://github.com/COVESA/vehicle_signal_specification/blob/v4.0/spec/units.yaml.",
     )
     parser.add_argument(
         "-e",
@@ -109,9 +110,11 @@ def main():
         )
         print(f"Known extended attributes: {', '.join(ext_attributes_list)}")
 
+    units_list = args.units.split(",")
+
     generate_model(
         args.input_file_path,
-        args.units,
+        units_list,
         args.language,
         args.target_folder,
         args.name,

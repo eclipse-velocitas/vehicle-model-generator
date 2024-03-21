@@ -35,7 +35,7 @@ class FileImport:
     def __init__(
         self,
         file_path: str,
-        unit_file_path: str,
+        unit_file_path_list: str,
         include_dirs: List[str],
         strict: bool,
         overlays: List[str],
@@ -46,33 +46,34 @@ class FileImport:
         self.overlays = overlays
         # setting the file format implementation object from the file_path
         self.format_implementation = self.__get_format_implementation(
-            self.file_path, unit_file_path
+            self.file_path, unit_file_path_list
         )
 
     def __get_format_implementation(
         self,
         file_path: str,
-        unit_file_path: str,
+        unit_file_path_list: List[str],
     ):
         file_ext = os.path.splitext(file_path)[1][1:]
-        unit_file_ext = os.path.splitext(unit_file_path)[1][1:]
-        if unit_file_ext == "yaml":
-            if file_ext in formats:
-                if file_ext == VSPEC:
-                    return Vspec(
-                        file_path=self.file_path,
-                        unit_file_path=unit_file_path,
-                        include_dirs=self.include_dirs,
-                        strict=self.strict,
-                        overlays=self.overlays,
-                    )
-                elif file_ext == JSON:
-                    return Json(
-                        file_path=file_path,
-                        unit_file_path=unit_file_path,
-                    )
-            else:
+        for unit_file_path in unit_file_path_list:
+            unit_file_ext = os.path.splitext(unit_file_path)[1][1:]
+            if unit_file_ext != "yaml":
                 raise UnsupportedFileFormat(file_ext)
+
+        if file_ext in formats:
+            if file_ext == VSPEC:
+                return Vspec(
+                    file_path=self.file_path,
+                    unit_file_path_list=unit_file_path_list,
+                    include_dirs=self.include_dirs,
+                    strict=self.strict,
+                    overlays=self.overlays,
+                )
+            elif file_ext == JSON:
+                return Json(
+                    file_path=file_path,
+                    unit_file_path=unit_file_path,
+                )
         else:
             raise UnsupportedFileFormat(unit_file_ext)
 

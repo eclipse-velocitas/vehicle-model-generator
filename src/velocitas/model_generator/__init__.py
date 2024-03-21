@@ -51,7 +51,7 @@ from velocitas.model_generator.tree_generator.file_import import (
 
 def generate_model(
     input_file_path: str,
-    input_unit_file_path: str,
+    input_unit_file_path_list: List[str],
     language: str,
     target_folder: str = "./gen_model",
     name: str = "vehicle",
@@ -64,7 +64,7 @@ def generate_model(
     include_dirs.extend(include_dir)
 
     # try downloading deafult unit file if none is specified
-    if input_unit_file_path == "":
+    if not input_unit_file_path_list:
         uri = "https://github.com/COVESA/vehicle_signal_specification/blob/v4.0/spec/units.yaml"
         input_unit_file_path = os.path.join(
             os.path.dirname(input_file_path), "units.yaml"
@@ -75,6 +75,9 @@ def generate_model(
             with open(input_unit_file_path, "w") as outfile:
                 for item in infile.json()["payload"]["blob"]["rawLines"]:
                     outfile.write(f"{item} \n")
+        input_unit_file_path_list = [
+            input_file_path,
+        ]
 
     # yaml_out = open(args.yaml_file, "w", encoding="utf-8")
 
