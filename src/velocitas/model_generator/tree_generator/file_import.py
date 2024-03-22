@@ -54,6 +54,15 @@ class FileImport:
         file_path: str,
         unit_file_path_list: List[str],
     ):
+        """Initialize implementation of VSPEC or JSON.
+
+        Args:
+            file_path str: path to the file that is used for format checking
+            unit_file_path_list List[str]: a list of unit files that get checked to be yaml files
+
+        Returns:
+            Error UnsupportedFileFormat: If either file specified is not supported.
+        """
         file_ext = os.path.splitext(file_path)[1][1:]
         for unit_file_path in unit_file_path_list:
             unit_file_ext = os.path.splitext(unit_file_path)[1][1:]

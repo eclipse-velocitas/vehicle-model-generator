@@ -60,6 +60,18 @@ def generate_model(
     ext_attributes_list: List[str] = [],
     overlays: List[str] = [],
 ) -> None:
+    """Generates a model to a file (json, vspec)
+    input_file_path str: The file to convert.
+    input_unit_file_path_list List[str]: The unit file(s) used to generate the model.
+    language str: The programming language used (python/cpp).
+    target_folder str: The folder where the model should be generated to.
+    name str: The name of the model
+    strict bool: If enabled checks for VSS terminoligy.
+    include_dir: which directories to include for file searches
+    ext_attributes_list List[str]: The extended attributes that aren't considered by the generator (no warnings)
+    overlays List[str]: The overlay that is used to generate the model.
+    """
+
     include_dirs = ["."]
     include_dirs.extend(include_dir)
 

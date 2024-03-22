@@ -51,6 +51,7 @@ class Vspec(FileFormat):
         self.overlays = overlays
 
     def load_tree(self):
+        """loads a tree of a vspec file through vss-tools"""
         print("Loading vspec...")
         vspec.load_units(
             self.file_path,
@@ -95,6 +96,7 @@ class Json(FileFormat):
         return
 
     def load_tree(self):
+        """loads a tree of a json file through vss-tools"""
         print("Loading json...")
         output_json = json.load(open(self.file_path))
         self.__extend_fields(next(iter(output_json.values())))
