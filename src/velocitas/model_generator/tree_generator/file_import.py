@@ -35,7 +35,7 @@ class FileImport:
     def __init__(
         self,
         file_path: str,
-        unit_file_path_list: str,
+        unit_file_path_list: List[str],
         include_dirs: List[str],
         strict: bool,
         overlays: List[str],

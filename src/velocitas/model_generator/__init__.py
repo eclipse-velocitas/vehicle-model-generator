@@ -63,22 +63,6 @@ def generate_model(
     include_dirs = ["."]
     include_dirs.extend(include_dir)
 
-    # try downloading deafult unit file if none is specified
-    if not input_unit_file_path_list:
-        uri = "https://github.com/COVESA/vehicle_signal_specification/blob/v4.0/spec/units.yaml"
-        input_unit_file_path = os.path.join(
-            os.path.dirname(input_file_path), "units.yaml"
-        )
-        print(f"Downloading default units file to {input_unit_file_path} ...")
-        with requests.get(uri) as infile:
-            os.makedirs(os.path.split(input_unit_file_path)[0], exist_ok=True)
-            with open(input_unit_file_path, "w") as outfile:
-                for item in infile.json()["payload"]["blob"]["rawLines"]:
-                    outfile.write(f"{item} \n")
-        input_unit_file_path_list = [
-            input_file_path,
-        ]
-
     # yaml_out = open(args.yaml_file, "w", encoding="utf-8")
 
     if len(ext_attributes_list) > 0:
@@ -93,7 +77,7 @@ def generate_model(
 
         tree = FileImport(
             input_file_path,
-            input_unit_file_path,
+            input_unit_file_path_list,
             include_dirs,
             strict,
             overlays,

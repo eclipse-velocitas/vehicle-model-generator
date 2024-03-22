@@ -39,7 +39,6 @@ def test_generate(language: str, input_file_path: str, include_dir: str):
     input_unit_file_path = (
         Path(__file__).parent.joinpath("data", "json/units.yaml").__str__()
     )
-    print(input_unit_file_path)
     generate_model(
         input_file_path,
         input_unit_file_path,
