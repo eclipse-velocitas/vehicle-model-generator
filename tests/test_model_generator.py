@@ -37,7 +37,7 @@ test_data_base_path = Path(__file__).parent.joinpath("data")
 def test_generate(language: str, input_file_path: str, include_dir: str):
     input_file_path = Path(__file__).parent.joinpath("data", input_file_path).__str__()
     input_unit_file_path = (
-        Path(__file__).parent.joinpath("data", "json/units.yaml").__str__()
+        Path(__file__).parent.joinpath("data", "units.yaml").__str__()
     )
     generate_model(
         input_file_path,
