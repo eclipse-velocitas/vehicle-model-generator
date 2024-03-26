@@ -35,7 +35,6 @@ class FileFormat:
 
 
 class Vspec(FileFormat):
-
     def __init__(
         self,
         file_path: str,
@@ -81,7 +80,6 @@ class Vspec(FileFormat):
 
 
 class Json(FileFormat):
-
     def __init__(self, file_path: str, unit_file_path_list: List[str]):
         super().__init__(file_path)
         self.unit_file_path_list = unit_file_path_list

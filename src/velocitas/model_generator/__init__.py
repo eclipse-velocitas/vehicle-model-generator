@@ -35,8 +35,6 @@ import shutil
 import sys
 from typing import List
 
-import requests
-
 import vspec  # type: ignore
 
 from velocitas.model_generator.cpp.cpp_generator import VehicleModelCppGenerator

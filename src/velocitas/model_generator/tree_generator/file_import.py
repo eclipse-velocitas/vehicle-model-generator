@@ -31,7 +31,6 @@ class UnsupportedFileFormat(Exception):
 
 
 class FileImport:
-
     def __init__(
         self,
         file_path: str,
@@ -81,7 +80,7 @@ class FileImport:
             elif file_ext == JSON:
                 return Json(
                     file_path=file_path,
-                    unit_file_path=unit_file_path,
+                    unit_file_path_list=unit_file_path_list,
                 )
         else:
             raise UnsupportedFileFormat(unit_file_ext)
