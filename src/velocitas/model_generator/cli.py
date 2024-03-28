@@ -79,6 +79,14 @@ def main():
         " appear.",
     )
     parser.add_argument(
+        "-u",
+        "--units",
+        nargs="+",
+        type=str,
+        default=[],
+        help="The file locations of units files as comma separated list.",
+    )
+    parser.add_argument(
         "-e",
         "--extended-attributes",
         type=str,
@@ -104,6 +112,7 @@ def main():
 
     generate_model(
         args.input_file_path,
+        args.units,
         args.language,
         args.target_folder,
         args.name,
