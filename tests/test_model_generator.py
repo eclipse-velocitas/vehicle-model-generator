@@ -28,9 +28,13 @@ test_data_base_path = Path(__file__).parent.joinpath("data")
     "input_file_path,include_dir",
     [
         ("json/vss_rel_3.0.json", "."),
+        ("json/vss_rel_3.1.json", "."),
+        ("json/vss_rel_3.1.1.json", "."),
         ("json/vss_rel_4.0.json", "."),
         # because of typo in the specification not supported
         # ("vspec/v3.0/spec/VehicleSignalSpecification.vspec", "vspec/v3.0/spec"),
+        # ("vspec/v3.1/spec/VehicleSignalSpecification.vspec", "vspec/v3.1/spec"),
+        # ("vspec/v3.1.1/spec/VehicleSignalSpecification.vspec", "vspec/v3.1.1/spec"),
         ("vspec/v4.0/spec/VehicleSignalSpecification.vspec", "vspec/v4.0/spec"),
     ],
 )
