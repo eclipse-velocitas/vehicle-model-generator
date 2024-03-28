@@ -12,6 +12,8 @@ This generator creates a vehicle model from the given vspec specification for th
 
 ## Supported VSS versions
 * 3.0
+* 3.1
+* 3.1.1
 * 4.0
 
 ## Usage

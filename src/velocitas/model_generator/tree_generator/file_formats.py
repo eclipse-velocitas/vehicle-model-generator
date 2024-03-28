@@ -62,7 +62,6 @@ class Vspec(FileFormat):
             tree_type=vspec.VSSTreeType.SIGNAL_TREE,
             break_on_name_style_violation=self.strict,
             expand_inst=False,
-            data_type_tree=vspec.VSSTreeType.SIGNAL_TREE,
         )
 
         for overlay in self.overlays:

@@ -66,7 +66,7 @@ class FileImport:
         for unit_file_path in unit_file_path_list:
             unit_file_ext = os.path.splitext(unit_file_path)[1][1:]
             if unit_file_ext != "yaml":
-                raise UnsupportedFileFormat(file_ext)
+                raise UnsupportedFileFormat(unit_file_ext)
 
         if file_ext in formats:
             if file_ext == VSPEC:
@@ -83,7 +83,7 @@ class FileImport:
                     unit_file_path_list=unit_file_path_list,
                 )
         else:
-            raise UnsupportedFileFormat(unit_file_ext)
+            raise UnsupportedFileFormat(file_ext)
 
     def load_tree(self):
         return self.format_implementation.load_tree()
