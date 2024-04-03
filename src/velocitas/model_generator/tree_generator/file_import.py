@@ -32,27 +32,56 @@ class UnsupportedFileFormat(Exception):
 
 class FileImport:
     def __init__(
-        self, file_path: str, include_dirs: List[str], strict: bool, overlays: List[str]
+        self,
+        file_path: str,
+        unit_file_path_list: List[str],
+        include_dirs: List[str],
+        strict: bool,
+        overlays: List[str],
     ):
         self.file_path = file_path
         self.include_dirs = include_dirs
         self.strict = strict
         self.overlays = overlays
         # setting the file format implementation object from the file_path
-        self.format_implementation = self.__get_format_implementation(self.file_path)
+        self.format_implementation = self.__get_format_implementation(
+            self.file_path, unit_file_path_list
+        )
 
-    def __get_format_implementation(self, file_path: str):
+    def __get_format_implementation(
+        self,
+        file_path: str,
+        unit_file_path_list: List[str],
+    ):
+        """Initialize implementation of VSPEC or JSON.
+
+        Args:
+            file_path str: path to the file that is used for format checking
+            unit_file_path_list List[str]: a list of unit files that get checked to be yaml files
+
+        Returns:
+            Error UnsupportedFileFormat: If either file specified is not supported.
+        """
         file_ext = os.path.splitext(file_path)[1][1:]
+        for unit_file_path in unit_file_path_list:
+            unit_file_ext = os.path.splitext(unit_file_path)[1][1:]
+            if unit_file_ext != "yaml":
+                raise UnsupportedFileFormat(unit_file_ext)
+
         if file_ext in formats:
             if file_ext == VSPEC:
                 return Vspec(
                     file_path=self.file_path,
+                    unit_file_path_list=unit_file_path_list,
                     include_dirs=self.include_dirs,
                     strict=self.strict,
                     overlays=self.overlays,
                 )
             elif file_ext == JSON:
-                return Json(file_path=file_path)
+                return Json(
+                    file_path=file_path,
+                    unit_file_path_list=unit_file_path_list,
+                )
         else:
             raise UnsupportedFileFormat(file_ext)
 

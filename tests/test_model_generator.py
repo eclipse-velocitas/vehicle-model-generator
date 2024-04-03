@@ -28,13 +28,29 @@ test_data_base_path = Path(__file__).parent.joinpath("data")
     "input_file_path,include_dir",
     [
         ("json/vss_rel_3.0.json", "."),
-        ("vspec/v3.0/spec/VehicleSignalSpecification.vspec", "vspec/v3.0/spec"),
+        ("json/vss_rel_3.1.json", "."),
+        ("json/vss_rel_3.1.1.json", "."),
+        ("json/vss_rel_4.0.json", "."),
+        # because of typo in the specification not supported
+        # ("vspec/v3.0/spec/VehicleSignalSpecification.vspec", "vspec/v3.0/spec"),
+        # ("vspec/v3.1/spec/VehicleSignalSpecification.vspec", "vspec/v3.1/spec"),
+        # ("vspec/v3.1.1/spec/VehicleSignalSpecification.vspec", "vspec/v3.1.1/spec"),
+        ("vspec/v4.0/spec/VehicleSignalSpecification.vspec", "vspec/v4.0/spec"),
     ],
 )
 def test_generate(language: str, input_file_path: str, include_dir: str):
     input_file_path = Path(__file__).parent.joinpath("data", input_file_path).__str__()
+    input_unit_file_path_list = [
+        (Path(__file__).parent.joinpath("data", "units.yaml").__str__()),
+    ]
+    print(input_unit_file_path_list)
     generate_model(
-        input_file_path, language, "output", "vehicle", include_dir=include_dir
+        input_file_path,
+        input_unit_file_path_list,
+        language,
+        "output",
+        "vehicle",
+        include_dir=include_dir,
     )
 
     if language == "python":
