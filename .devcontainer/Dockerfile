@@ -12,7 +12,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-FROM ghcr.io/eclipse-velocitas/devcontainer-base-images/python:v0.2
+FROM ghcr.io/eclipse-velocitas/devcontainer-base-images/python:v0.3
 
 ENV DOCKER_BUILDKIT=1
 
