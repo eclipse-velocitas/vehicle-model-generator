@@ -1,1 +1,1 @@
-vss-tools@git+https://github.com/covesa/vss-tools@v4.0
+vss-tools==4.0
