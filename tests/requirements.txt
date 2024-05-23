@@ -1,4 +1,4 @@
 pytest
 pytest-cov
 conan==1.62.0
-velocitas-lib @ git+https://github.com/eclipse-velocitas/velocitas-lib@v0.0.3
+velocitas-lib==0.0.4
