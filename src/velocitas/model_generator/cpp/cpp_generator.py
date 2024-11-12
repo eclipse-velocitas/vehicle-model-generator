@@ -378,7 +378,7 @@ class VehicleModelConan(ConanFile):
                     header_public.write(
                         f"velocitas::DataPoint{data_type} {child.name};\n\n"
                     )
-                    member += ",\n\t\t" + f'{child.name}("{child.name}", this)'
+                    member += ",\n\t\t" + f'{child.name}("{child.name}", Type::{child.type.value.upper()}, this)'
 
                 if child.type == VSSType.BRANCH:
                     if child.instances:
@@ -448,8 +448,6 @@ class VehicleModelConan(ConanFile):
         raise ValueError("", "", f"is of type {type(i)} which is unsupported")
 
     def __get_data_type(self, data_type: str) -> str:
-        # there are no 8bit or 16bit types in grpc...
-        data_type = data_type.replace("8", "32").replace("16", "32")
         if data_type[-1] == "]":
             return data_type[0].upper() + data_type[1:-2] + "Array"
         return data_type[0].upper() + data_type[1:]
