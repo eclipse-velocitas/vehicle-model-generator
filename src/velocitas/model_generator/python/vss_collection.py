@@ -58,6 +58,7 @@ class VssCollection:
 
     def __gen_collection(self, node: VSSNode):
         print(f"- {self.name:30}{node.instances}")
+        assert node.instances is not None
         self.ctx.write(self.ctx.line_break)
         self.ctx.write(f"class {self.name}(Model):\n")
         with self.ctx as def_ctx:

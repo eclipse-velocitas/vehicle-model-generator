@@ -172,6 +172,7 @@ class VehicleModelConan(ConanFile):
     def __document_member(self, node: VSSNode):
         self.ctx_header.write("/**\n")
         if node.type.value == "attribute":
+            assert node.datatype is not None
             self.ctx_header.write(
                 f"* {node.name}: {node.type.value} ({node.datatype.value})\n"
             )
@@ -378,7 +379,10 @@ class VehicleModelConan(ConanFile):
                     header_public.write(
                         f"velocitas::DataPoint{data_type} {child.name};\n\n"
                     )
-                    member += ",\n\t\t" + f'{child.name}("{child.name}", this)'
+                    member += (
+                        ",\n\t\t"
+                        + f'{child.name}("{child.name}", Type::{child.type.value.upper()}, this)'
+                    )
 
                 if child.type == VSSType.BRANCH:
                     if child.instances:
@@ -410,6 +414,7 @@ class VehicleModelConan(ConanFile):
         self.ctx_header.reset()
 
     def __gen_instances(self, node: VSSNode) -> list[tuple[str, list]]:
+        assert node.instances is not None
         instances = node.instances
 
         reg_ex = r"\w+\[\d+,(\d+)\]"
@@ -448,8 +453,6 @@ class VehicleModelConan(ConanFile):
         raise ValueError("", "", f"is of type {type(i)} which is unsupported")
 
     def __get_data_type(self, data_type: str) -> str:
-        # there are no 8bit or 16bit types in grpc...
-        data_type = data_type.replace("8", "32").replace("16", "32")
         if data_type[-1] == "]":
             return data_type[0].upper() + data_type[1:-2] + "Array"
         return data_type[0].upper() + data_type[1:]
