@@ -137,6 +137,7 @@ gen_model/
 
 # test data repos
 tests/data/vspec
+tests/data/json
 
 # test reports
 results/

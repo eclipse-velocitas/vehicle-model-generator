@@ -72,7 +72,9 @@ class VehicleModelCppGenerator:
         path = os.path.join(self.target_folder, "conanfile.py")
         with open(path, "w", encoding="utf-8") as file:
             file.write(
-                """from conans import ConanFile
+                """from conan import ConanFile
+from conan.tools.files import copy
+import os
 
 class VehicleModelConan(ConanFile):
     name = "vehicle-model"
@@ -87,7 +89,9 @@ class VehicleModelConan(ConanFile):
     requires = "vehicle-app-sdk/[>=0.1]"
 
     def package(self):
-        self.copy("*.hpp")
+        copy(self,"*.hpp",
+            src=os.path.join(self.source_folder, "include"),
+            dst=os.path.join(self.package_folder, "include"),)
 """
             )
 

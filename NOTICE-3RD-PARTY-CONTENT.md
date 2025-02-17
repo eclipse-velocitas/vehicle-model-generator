@@ -14,12 +14,12 @@
 |mypy-extensions|1.1.0|unknown|
 |nodeenv|1.9.1|BSD|
 |packaging|25.0|Apache 2.0<br/>BSD|
-|platformdirs|4.3.7|MIT|
+|platformdirs|4.3.8|MIT|
 |pre-commit|4.2.0|MIT|
 |PyYAML|6.0.2|MIT|
 |tomli|2.2.1|MIT|
 |typing-extensions|4.13.2|unknown|
-|virtualenv|20.30.0|MIT|
+|virtualenv|20.31.1|MIT|
 |vss-tools|4.0|Mozilla Public License 2.0|
 ## Workflows
 | Dependency | Version | License |
