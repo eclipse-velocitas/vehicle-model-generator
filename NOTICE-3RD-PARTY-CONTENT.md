@@ -3,24 +3,23 @@
 ## Python
 | Dependency | Version | License |
 |:-----------|:-------:|--------:|
-|anytree|2.12.1|Apache 2.0|
+|anytree|2.13.0|unknown|
 |cfgv|3.4.0|MIT|
 |deprecation|2.1.0|Apache 2.0|
 |distlib|0.3.9|Python Software Foundation License|
-|filelock|3.16.1|The Unlicense (Unlicense)|
-|graphql-core|3.2.5|MIT|
-|identify|2.6.2|MIT|
-|mypy|1.13.0|MIT|
-|mypy-extensions|1.0.0|MIT|
+|filelock|3.18.0|The Unlicense (Unlicense)|
+|graphql-core|3.2.6|MIT|
+|identify|2.6.10|MIT|
+|mypy|1.15.0|MIT|
+|mypy-extensions|1.1.0|unknown|
 |nodeenv|1.9.1|BSD|
-|packaging|24.2|Apache 2.0<br/>BSD|
-|platformdirs|4.3.6|MIT|
-|pre-commit|4.0.1|MIT|
+|packaging|25.0|Apache 2.0<br/>BSD|
+|platformdirs|4.3.7|MIT|
+|pre-commit|4.2.0|MIT|
 |PyYAML|6.0.2|MIT|
-|six|1.16.0|MIT|
-|tomli|2.1.0|MIT|
-|typing-extensions|4.12.2|Python Software Foundation License|
-|virtualenv|20.27.1|MIT|
+|tomli|2.2.1|MIT|
+|typing-extensions|4.13.2|unknown|
+|virtualenv|20.30.0|MIT|
 |vss-tools|4.0|Mozilla Public License 2.0|
 ## Workflows
 | Dependency | Version | License |
