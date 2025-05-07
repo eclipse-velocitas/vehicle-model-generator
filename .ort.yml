@@ -25,7 +25,18 @@ curations:
     curations:
       comment: "Proper license is defined in package repository https://pypi.org/project/packaging/"
       concluded_license: "Apache-2.0"
-
+  - id: "PyPI::mypy:1.9.0"
+    curations:
+      comment: "Proper license is defined in package repository https://pypi.org/project/mypy/"
+      concluded_license: "MIT"
+  - id: "PyPI::setuptools:69.2.0"
+    curations:
+      comment: "Proper license is defined in package repository https://pypi.org/project/setuptools/"
+      concluded_license: "MIT"
+  - id: "PyPI::coverage:7.4.4"
+    curations:
+      comment: "Proper license is defined in package repository https://pypi.org/project/coverage/"
+      concluded_license: "Apache-2.0"
 resolutions:
   vulnerabilities:
   - id: "CVE-2018-20225"
