@@ -1,4 +1,4 @@
 pytest
 pytest-cov
-conan==1.62.0
-velocitas-lib==0.0.4
+conan==2.*
+velocitas-lib==0.0.13
