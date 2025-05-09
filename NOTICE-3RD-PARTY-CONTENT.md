@@ -19,7 +19,7 @@
 |PyYAML|6.0.2|MIT|
 |tomli|2.2.1|MIT|
 |typing-extensions|4.13.2|unknown|
-|virtualenv|20.31.1|MIT|
+|virtualenv|20.31.2|MIT|
 |vss-tools|4.0|Mozilla Public License 2.0|
 ## Workflows
 | Dependency | Version | License |
