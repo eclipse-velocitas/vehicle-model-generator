@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (c) 2022-2024 Contributors to the Eclipse Foundation
+# Copyright (c) 2022-2025 Contributors to the Eclipse Foundation
 #
 # This program and the accompanying materials are made available under the
 # terms of the Apache License, Version 2.0 which is available at
@@ -58,6 +58,7 @@ class VssCollection:
 
     def __gen_collection(self, node: VSSNode):
         print(f"- {self.name:30}{node.instances}")
+        assert node.instances is not None
         self.ctx.write(self.ctx.line_break)
         self.ctx.write(f"class {self.name}(Model):\n")
         with self.ctx as def_ctx:

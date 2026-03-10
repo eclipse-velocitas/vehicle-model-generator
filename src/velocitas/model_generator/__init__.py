@@ -1,20 +1,5 @@
-# Copyright (c) 2023-2024 Contributors to the Eclipse Foundation
-#
-# This program and the accompanying materials are made available under the
-# terms of the Apache License, Version 2.0 which is available at
-# https://www.apache.org/licenses/LICENSE-2.0.
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-# License for the specific language governing permissions and limitations
-# under the License.
-#
-# SPDX-License-Identifier: Apache-2.0
-
 #!/usr/bin/env python3
-
-# Copyright (c) 2022-2024 Contributors to the Eclipse Foundation
+# Copyright (c) 2022-2025 Contributors to the Eclipse Foundation
 #
 # This program and the accompanying materials are made available under the
 # terms of the Apache License, Version 2.0 which is available at
@@ -49,6 +34,7 @@ from velocitas.model_generator.tree_generator.file_import import (
 
 def generate_model(
     input_file_path: str,
+    input_unit_file_path_list: List[str],
     language: str,
     target_folder: str = "./gen_model",
     name: str = "vehicle",
@@ -57,6 +43,18 @@ def generate_model(
     ext_attributes_list: List[str] = [],
     overlays: List[str] = [],
 ) -> None:
+    """Generates a model to a file (json, vspec)
+    input_file_path str: The file to convert.
+    input_unit_file_path_list List[str]: The unit file(s) used to generate the model.
+    language str: The programming language used (python/cpp).
+    target_folder str: The folder where the model should be generated to.
+    name str: The name of the model
+    strict bool: If enabled checks for VSS terminoligy.
+    include_dir: which directories to include for file searches
+    ext_attributes_list List[str]: The extended attributes that aren't considered by the generator (no warnings)
+    overlays List[str]: The overlay that is used to generate the model.
+    """
+
     include_dirs = ["."]
     include_dirs.extend(include_dir)
 
@@ -72,7 +70,13 @@ def generate_model(
         if os.path.exists(target_folder):
             shutil.rmtree(target_folder)
 
-        tree = FileImport(input_file_path, include_dirs, strict, overlays).load_tree()
+        tree = FileImport(
+            input_file_path,
+            input_unit_file_path_list,
+            include_dirs,
+            strict,
+            overlays,
+        ).load_tree()
 
         if language == "python":
             print("Recursing tree and creating Python code...")

@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2024 Contributors to the Eclipse Foundation
+# Copyright (c) 2022-2025 Contributors to the Eclipse Foundation
 #
 # This program and the accompanying materials are made available under the
 # terms of the Apache License, Version 2.0 which is available at
@@ -72,7 +72,9 @@ class VehicleModelCppGenerator:
         path = os.path.join(self.target_folder, "conanfile.py")
         with open(path, "w", encoding="utf-8") as file:
             file.write(
-                """from conans import ConanFile
+                """from conan import ConanFile
+from conan.tools.files import copy
+import os
 
 class VehicleModelConan(ConanFile):
     name = "vehicle-model"
@@ -87,7 +89,9 @@ class VehicleModelConan(ConanFile):
     requires = "vehicle-app-sdk/[>=0.1]"
 
     def package(self):
-        self.copy("*.hpp")
+        copy(self,"*.hpp",
+            src=os.path.join(self.source_folder, "include"),
+            dst=os.path.join(self.package_folder, "include"),)
 """
             )
 
@@ -172,6 +176,7 @@ class VehicleModelConan(ConanFile):
     def __document_member(self, node: VSSNode):
         self.ctx_header.write("/**\n")
         if node.type.value == "attribute":
+            assert node.datatype is not None
             self.ctx_header.write(
                 f"* {node.name}: {node.type.value} ({node.datatype.value})\n"
             )
@@ -378,7 +383,10 @@ class VehicleModelConan(ConanFile):
                     header_public.write(
                         f"velocitas::DataPoint{data_type} {child.name};\n\n"
                     )
-                    member += ",\n\t\t" + f'{child.name}("{child.name}", this)'
+                    member += (
+                        ",\n\t\t"
+                        + f'{child.name}("{child.name}", Type::{child.type.value.upper()}, this)'
+                    )
 
                 if child.type == VSSType.BRANCH:
                     if child.instances:
@@ -410,6 +418,7 @@ class VehicleModelConan(ConanFile):
         self.ctx_header.reset()
 
     def __gen_instances(self, node: VSSNode) -> list[tuple[str, list]]:
+        assert node.instances is not None
         instances = node.instances
 
         reg_ex = r"\w+\[\d+,(\d+)\]"
@@ -448,8 +457,6 @@ class VehicleModelConan(ConanFile):
         raise ValueError("", "", f"is of type {type(i)} which is unsupported")
 
     def __get_data_type(self, data_type: str) -> str:
-        # there are no 8bit or 16bit types in grpc...
-        data_type = data_type.replace("8", "32").replace("16", "32")
         if data_type[-1] == "]":
             return data_type[0].upper() + data_type[1:-2] + "Array"
         return data_type[0].upper() + data_type[1:]
