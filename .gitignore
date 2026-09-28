@@ -142,5 +142,20 @@ tests/data/json
 # test reports
 results/
 
+# IDE specific
+.idea/
+
+# Node.js
+node_modules/
+**/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+*.tsbuildinfo
+
+# Build & generated outputs
+**/dist/
+**/generated-sdk/
 # macOS specific
 .DS_Store

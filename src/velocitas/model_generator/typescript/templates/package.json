@@ -1,0 +1,26 @@
+{
+  "name": "$PACKAGE_NAME",
+  "version": "0.1.0",
+  "description": "Velocitas TypeScript Vehicle Model generated from VSS",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "vehicle-app-ts-sdk": "^0.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}

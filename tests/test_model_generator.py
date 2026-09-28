@@ -13,12 +13,14 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import compileall
+import shutil
 import subprocess
 import sys
 from pathlib import Path
 
 import pytest
 from velocitas.model_generator import generate_model
+from tests.typescript_sdk import require_typescript_sdk_path
 
 test_data_base_path = Path(__file__).parent.joinpath("data")
 
@@ -34,7 +36,7 @@ def get_unit_file_paths(input_file_path: str, include_dir: str) -> list[str]:
     return [test_data_base_path.joinpath("units.yaml").__str__()]
 
 
-@pytest.mark.parametrize("language", ["python", "cpp"])
+@pytest.mark.parametrize("language", ["python", "cpp", "typescript"])
 @pytest.mark.parametrize(
     "input_file_path,include_dir,out_dir",
     [
@@ -65,6 +67,12 @@ def get_unit_file_paths(input_file_path: str, include_dir: str) -> list[str]:
             "vspec/v6.0/spec",
             "output/vspec/v6.0",
         ),
+        ("json/vss_rel_6.1.json", ".", "output/json/vss6.1"),
+        (
+            "vspec/v6.1/spec/VehicleSignalSpecification.vspec",
+            "vspec/v6.1/spec",
+            "output/vspec/v6.1",
+        ),
     ],
 )
 def test_generate(
@@ -83,6 +91,7 @@ def test_generate(
         output_path,
         "vehicle",
         include_dir=[include_dir],
+        ext_attributes_list=["enum"],
     )
 
     if language == "python":
@@ -90,3 +99,11 @@ def test_generate(
         assert compileall.compile_dir(output_path, force=True)
     elif language == "cpp":
         subprocess.check_call(["conan", "export", output_path])
+    elif language == "typescript":
+        if shutil.which("node") is None or shutil.which("npm") is None:
+            pytest.skip("Node.js or npm is not installed")
+        sdk_path = require_typescript_sdk_path()
+        subprocess.check_call(
+            ["npm", "install", str(sdk_path), "--no-package-lock"], cwd=output_path
+        )
+        subprocess.check_call(["npx", "tsc", "--noEmit"], cwd=output_path)

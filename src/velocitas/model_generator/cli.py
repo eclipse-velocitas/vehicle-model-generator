@@ -33,7 +33,7 @@ def main():
         "--package-name",
         type=str,
         default="vehicle",
-        help="When generating a python model this is used as name of the module/package.\
+        help="When generating a python or typescript model this is used as name of the module/package.\
              For C++ it is used as root namespace",
     )
     parser.add_argument(
@@ -63,7 +63,7 @@ def main():
         "-l",
         "--language",
         help="The target language of the generated code.",
-        choices=["python", "cpp"],
+        choices=["python", "cpp", "typescript"],
         default="python",
     )
     parser.add_argument(

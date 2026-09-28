@@ -1,0 +1,13 @@
+$LICENSE_HEADER
+
+import {
+    type ModelFactory,
+    type VehicleDataBrokerClient,
+} from "vehicle-app-ts-sdk";
+import { $ROOT_NAME } from "./$ROOT_NAME.js";
+
+export class ${ROOT_NAME}Factory implements ModelFactory<$ROOT_NAME> {
+    create(client?: VehicleDataBrokerClient): $ROOT_NAME {
+        return new ${ROOT_NAME}(client);
+    }
+}

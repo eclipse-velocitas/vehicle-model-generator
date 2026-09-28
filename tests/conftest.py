@@ -59,3 +59,4 @@ def pytest_configure(config) -> None:
     prepare_vss_repo_data("v5.0", "v5.0/vss.json")
     prepare_vss_repo_data("v5.1", "v5.1/vss.json")
     prepare_vss_repo_data("v6.0", "v6.0/vss.json")
+    prepare_vss_repo_data("v6.1", "v6.1/vss.json")

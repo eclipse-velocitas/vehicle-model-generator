@@ -11,6 +11,9 @@ license-files = ["LICENSE"]
 [tool.setuptools.dynamic]
 dependencies = { file = ["requirements.txt"] }
 
+[tool.setuptools.package-data]
+"velocitas.model_generator.typescript" = ["templates/*"]
+
 
 [build-system]
 requires = ["setuptools >= 61.0", "setuptools_scm[toml]"]
