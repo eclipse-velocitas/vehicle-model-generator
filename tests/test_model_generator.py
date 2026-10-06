@@ -49,13 +49,19 @@ def get_unit_file_paths(input_file_path: str, include_dir: str) -> list[str]:
         ("json/vss_rel_5.0.json", ".", "output/json/vss5.0"),
         ("json/vss_rel_5.1.json", ".", "output/json/vss5.1"),
         ("json/vss_rel_6.0.json", ".", "output/json/vss6.0"),
-        # because of typo in the specifications 3.0, 3.1, 3.11, 4.0, 4,1, 4.2 and 5.1 are not supported
+        ("json/vss_rel_6.1.json", ".", "output/json/vss6.1"),
+        # because of typo in the specifications 3.0, 3.1, 3.1.1, 4.0, 4,1, 4.2 and 5.1 are not supported
         # ("vspec/v3.0/spec/VehicleSignalSpecification.vspec", "vspec/v3.0/spec", "output/vspec/v3.0"),
         # ("vspec/v3.1/spec/VehicleSignalSpecification.vspec", "vspec/v3.1/spec", "output/vspec/v3.1"),
         # ("vspec/v3.1.1/spec/VehicleSignalSpecification.vspec", "vspec/v3.1.1/spec", "output/vspec/v3.1.1"),
         # ("vspec/v4.0/spec/VehicleSignalSpecification.vspec","vspec/v4.0/spec","output/vspec/v4.0",),
         # ("vspec/v4.1/spec/VehicleSignalSpecification.vspec", "vspec/v4.1/spec", "output/vspec/v4.1"),
-        #  ("vspec/v4.2/spec/VehicleSignalSpecification.vspec", "vspec/v4.2/spec", "output/vspec/v4.2"),
+        # ("vspec/v4.2/spec/VehicleSignalSpecification.vspec", "vspec/v4.2/spec", "output/vspec/v4.2"),
+        (
+            "vspec/v4.2.1/spec/VehicleSignalSpecification.vspec",
+            "vspec/v4.2.1/spec",
+            "output/vspec/v4.2.1",
+        ),
         (
             "vspec/v5.0/spec/VehicleSignalSpecification.vspec",
             "vspec/v5.0/spec",
@@ -67,7 +73,6 @@ def get_unit_file_paths(input_file_path: str, include_dir: str) -> list[str]:
             "vspec/v6.0/spec",
             "output/vspec/v6.0",
         ),
-        ("json/vss_rel_6.1.json", ".", "output/json/vss6.1"),
         (
             "vspec/v6.1/spec/VehicleSignalSpecification.vspec",
             "vspec/v6.1/spec",
@@ -90,7 +95,7 @@ def test_generate(
         language,
         output_path,
         "vehicle",
-        include_dir=[include_dir],
+        include_dir=[str(test_data_base_path.joinpath(include_dir))],
         ext_attributes_list=["enum"],
     )
 
