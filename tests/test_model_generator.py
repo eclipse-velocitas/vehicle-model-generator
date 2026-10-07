@@ -20,7 +20,10 @@ from pathlib import Path
 
 import pytest
 from velocitas.model_generator import generate_model
-from tests.typescript_sdk import require_typescript_sdk_path
+from tests.typescript_sdk import (
+    install_local_typescript_sdk,
+    require_typescript_sdk_path,
+)
 
 test_data_base_path = Path(__file__).parent.joinpath("data")
 
@@ -108,7 +111,5 @@ def test_generate(
         if shutil.which("node") is None or shutil.which("npm") is None:
             pytest.skip("Node.js or npm is not installed")
         sdk_path = require_typescript_sdk_path()
-        subprocess.check_call(
-            ["npm", "install", str(sdk_path), "--no-package-lock"], cwd=output_path
-        )
+        install_local_typescript_sdk(Path(output_path), sdk_path)
         subprocess.check_call(["npx", "tsc", "--noEmit"], cwd=output_path)

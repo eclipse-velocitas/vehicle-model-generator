@@ -15,6 +15,7 @@
 import os
 import shutil
 import tempfile
+from pathlib import Path
 
 import pytest
 
@@ -26,7 +27,10 @@ from velocitas.model_generator.typescript.vss_collection import VssCollection
 from velocitas.model_generator.typescript.typescript_generator import (
     VehicleModelTypescriptGenerator,
 )
-from tests.typescript_sdk import require_typescript_sdk_path
+from tests.typescript_sdk import (
+    install_local_typescript_sdk,
+    require_typescript_sdk_path,
+)
 from vss_tools.tree import VSSNode  # type: ignore
 
 
@@ -178,7 +182,12 @@ def test_typescript_generator_basic():
         assert 'this.Speed = new Sensor("Speed", this);' in vehicle_ts
         assert "createVehicle" not in vehicle_ts
         assert "VehicleFactory" not in vehicle_ts
-        assert 'import {' in vehicle_ts and '"vehicle-app-ts-sdk"' in vehicle_ts
+        assert (
+            'import {' in vehicle_ts
+            and '"vehicle-app-ts-sdk"' in vehicle_ts
+        )
+        package_json = open(os.path.join(temp_dir, "package.json")).read()
+        assert '"vehicle-app-ts-sdk": "^0.1.0"' in package_json
 
         factory_ts = open(os.path.join(temp_dir, "src", "vehicle", "VehicleFactory.ts")).read()
         assert "type ModelFactory," in factory_ts
@@ -477,13 +486,7 @@ def test_typescript_tsc_and_node_smoke():
         generator = VehicleModelTypescriptGenerator(root_node, temp_dir, "vehicle")
         generator.generate()
 
-        res_install = subprocess.run(
-            ["npm", "install", str(sdk_path), "--no-package-lock"],
-            cwd=temp_dir,
-            capture_output=True,
-            text=True,
-        )
-        assert res_install.returncode == 0, res_install.stdout + res_install.stderr
+        install_local_typescript_sdk(Path(temp_dir), sdk_path)
 
         res_typecheck = subprocess.run(
             ["npx", "tsc", "--project", temp_dir, "--noEmit"],

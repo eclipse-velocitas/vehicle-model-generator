@@ -31,7 +31,7 @@ Out of the box the following VSS versions are supported:
 - VSS 5.x
 - VSS 6.x
 
-Support for other vspec version might requires changes to the baseline vspec files:
+Support for other vspec version might require changes to the baseline vspec files:
 - **3.0, 3.1, 3.1.1:** Convert legacy `units.yaml` entries to the `vss-tools` 6.0 schema and change `type: Actuator` to `type: actuator` in `Powertrain/Battery.vspec`. VSS 3.1 also needs a description for `Vehicle.Body.Lights.Brake`.
 - **4.0:** Convert legacy `units.yaml` entries to the `vss-tools` 6.0 schema.
 - **4.1:** In `units.yaml`, rename `ml.description` to `ml.definition`, `kg.label` to `kg.unit`, and `months.units` to `months.unit`.

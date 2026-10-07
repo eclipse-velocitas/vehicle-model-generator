@@ -502,7 +502,7 @@ class VehicleModelTypescriptGenerator:
         lines = [self._get_license_header(), ""]
 
         sdk_symbols = {"Branch"}
-        if not is_root:
+        if not is_root or self.collections:
             sdk_symbols.add("Node")
         sdk_symbols.update(self.sdk_imports)
         sorted_symbols = sorted(sdk_symbols)
