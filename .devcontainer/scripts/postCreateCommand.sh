@@ -12,11 +12,10 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-python3 -m venv venv
-venv/bin/python -m pip install -r ./requirements-dev.txt
-venv/bin/python -m pip install -r ./requirements.txt
-venv/bin/python -m pip install -r ./tests/requirements.txt
-venv/bin/python -m pip install -e .
+pip3 install -r ./requirements-dev.txt
+pip3 install -r ./requirements.txt
+pip3 install -r ./tests/requirements.txt
+pip3 install -e .
 
 # add repo to git safe.directory
 REPO=$(pwd)

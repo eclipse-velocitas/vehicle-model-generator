@@ -3,13 +3,10 @@
 {
     "name": "Vehicle Model Generator",
     "dockerFile": "Dockerfile",
-    "runArgs": [
-        "--network=host"
-    ],
     "customizations": {
         "vscode": {
             "settings": {
-                "python.defaultInterpreterPath": "/workspaces/vehicle-model-generator-fork-minimal/venv/bin/python",
+                "python.defaultInterpreterPath": "/usr/bin/python3",
                 "python.terminal.activateEnvironment": true,
                 "python.analysis.typeCheckingMode": "basic",
                 "python.testing.pytestEnabled": true,

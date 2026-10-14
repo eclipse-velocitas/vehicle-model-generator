@@ -4,7 +4,9 @@ description = "Generates a language-specific data model out of VSS vspec files"
 dynamic = ["version", "dependencies"]
 requires-python = ">= 3.10"
 readme = "README.md"
-license = { file = "LICENSE" }
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+
 
 [tool.setuptools.dynamic]
 dependencies = { file = ["requirements.txt"] }

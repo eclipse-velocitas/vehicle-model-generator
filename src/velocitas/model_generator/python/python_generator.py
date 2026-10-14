@@ -146,14 +146,12 @@ class VehicleModelPythonGenerator:
         self.collections.clear()
 
     def __write_docstring_member(self, node: VSSNode):
-        child_type = self.__get_node_type(node)
-        if child_type in (NodeType.ACTUATOR, NodeType.SENSOR, NodeType.ATTRIBUTE):
-            child_datatype = self.__as_vss_datadatatype(node)
-            self.ctx.write(
-                f"{node.name}: {child_type.value} ({child_datatype.datatype})\n"
-            )
-        else:
-            self.ctx.write(f"{node.name}: {child_type.value}\n")
+        node_type = self.__get_node_type(node)
+        self.ctx.write(f"{node.name}: {node_type.value}")
+        if node_type in (NodeType.ACTUATOR, NodeType.SENSOR, NodeType.ATTRIBUTE):
+            node_datatype = self.__as_vss_datadatatype(node)
+            self.ctx.write(f" ({node_datatype.datatype})")
+        self.ctx.write("\n")
 
         description = getattr(node.data, "description", "")
         comment = getattr(node.data, "comment", None)
@@ -179,8 +177,6 @@ class VehicleModelPythonGenerator:
 
         if unit:
             self.ctx.write(f"Unit: {unit}\n")
-        else:
-            self.ctx.write("Unit: -\n")
 
         if allowed and len(allowed) > 0:
             allowed_values = ", ".join(map(str, allowed))

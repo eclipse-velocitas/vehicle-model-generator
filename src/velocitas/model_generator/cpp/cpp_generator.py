@@ -198,7 +198,11 @@ class VehicleModelConan(ConanFile):
         node_type = self.__get_node_type(node)
         self.ctx_header.write("/**\n")
 
-        self.ctx_header.write(f"* {node.name}: {node_type.name.lower()}\n")
+        self.ctx_header.write(f"* {node.name}: {node_type.value}")
+        if node_type in (NodeType.ACTUATOR, NodeType.SENSOR, NodeType.ATTRIBUTE):
+            node_datatype = self.__as_vss_datadatatype(node)
+            self.ctx_header.write(f" ({node_datatype.datatype})")
+        self.ctx_header.write("\n")
 
         description = getattr(node.data, "description", "")
         comment = getattr(node.data, "comment", None)
@@ -207,10 +211,6 @@ class VehicleModelConan(ConanFile):
         if comment and len(comment) > 0:
             self.ctx_header.write(f"* Comment: {comment}\n")
             self.ctx_header.write("*\n")
-
-        datatype = getattr(node.data, "datatype", None)
-        if datatype is not None:
-            self.ctx_header.write(f"* Data type: {datatype}\n")
 
         min_value = getattr(node.data, "min", None)
         max_value = getattr(node.data, "max", None)
