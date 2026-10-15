@@ -7,7 +7,6 @@
         "vscode": {
             "settings": {
                 "python.defaultInterpreterPath": "/usr/bin/python3",
-                "python.terminal.activateEnvironment": true,
                 "python.analysis.typeCheckingMode": "basic",
                 "python.testing.pytestEnabled": true,
                 "python.testing.pytestArgs": [
