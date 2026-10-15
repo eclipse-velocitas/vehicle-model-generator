@@ -1,1 +1,1 @@
-vss-tools==4.0
+vss-tools==6.0

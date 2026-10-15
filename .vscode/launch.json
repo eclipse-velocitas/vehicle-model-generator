@@ -6,18 +6,21 @@
     "compounds": [],
     "configurations": [
         {
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "name": "gen-vehicle-model",
             "program": "${workspaceFolder}/src/velocitas/model_generator/cli.py",
             "console": "internalConsole",
             "args": [
-                "-T", "velocitas_model",
-                "-N", "velocitas_model",
-                "-l", "${input:languageId}",
-                "-I", "${input:includeDir}",
+                "--target-folder", "velocitas_model",
+                "--package-name", "velocitas_model",
+                "--language", "${input:languageId}",
+                "--include-dir", "${input:includeDir}",
                 "${input:inputFilePath}"
-            ]
+            ],
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src/"
+                   }
         }
     ],
     "inputs": [

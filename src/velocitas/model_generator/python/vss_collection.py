@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (c) 2022-2025 Contributors to the Eclipse Foundation
+# Copyright (c) 2022-2026 Contributors to the Eclipse Foundation
 #
 # This program and the accompanying materials are made available under the
 # terms of the Apache License, Version 2.0 which is available at
@@ -15,10 +15,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import re
-from typing import List
+from typing import List, cast
 
 # Until vsspec issue will be fixed: https://github.com/COVESA/vss-tools/issues/208
-from vspec.model.vsstree import VSSNode  # type: ignore
+from vss_tools.tree import VSSNode, VSSDataBranch  # type: ignore
 
 from velocitas.model_generator.utils import CodeGeneratorContext
 
@@ -57,8 +57,9 @@ class VssCollection:
         self.__gen_collection(node)
 
     def __gen_collection(self, node: VSSNode):
-        print(f"- {self.name:30}{node.instances}")
-        assert node.instances is not None
+        node_data = cast(VSSDataBranch, node.data)
+        print(f"- {self.name:30}{node_data.instances}")
+        assert node_data.instances is not None
         self.ctx.write(self.ctx.line_break)
         self.ctx.write(f"class {self.name}(Model):\n")
         with self.ctx as def_ctx:
@@ -68,20 +69,20 @@ class VssCollection:
                 body_ctx.write("self.name = name\n")
 
                 complex_list = False
-                for instance in node.instances:
+                for instance in node_data.instances:
                     if isinstance(instance, list) or re.match(
                         _COLLECTION_REG_EX, instance
                     ):
                         complex_list = True
 
                 vss_instance = None
-                instance_list_len = len(node.instances)
+                instance_list_len = len(node_data.instances)
                 instance_type = f"{node.name}"
                 has_inner_types = False
                 if complex_list:
                     # Complex Instances collection
                     vss_instance = self.__parse_instances(
-                        _COLLECTION_REG_EX, node.instances[0]
+                        _COLLECTION_REG_EX, node_data.instances[0]
                     )
 
                     # if instance_list_len = 1:
@@ -98,7 +99,7 @@ class VssCollection:
                     # Simple instance type (list object).
                     # E.g. Row[1,4] or ['Low', 'High']
                     vss_instance = self.__parse_instances(
-                        _COLLECTION_REG_EX, node.instances
+                        _COLLECTION_REG_EX, node_data.instances
                     )
 
                 instance_list = vss_instance.content
@@ -119,7 +120,7 @@ class VssCollection:
             self.ctx.write(self.ctx.line_break)
             # add inner types
             inner_instances = self.__parse_instances(
-                _COLLECTION_REG_EX, node.instances[1]
+                _COLLECTION_REG_EX, node_data.instances[1]
             )
             self.__gen_collection_types(node.name, instance_type, inner_instances)
             # add getter

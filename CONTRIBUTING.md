@@ -60,7 +60,7 @@ https://www.eclipse.org/projects/handbook/#resources-commit
 
 ## Update Python dependencies
 
-Please use [pip-tools](https://github.com/jazzband/pip-tools) to update pip-based packages up to date. Any additional devlopment dependencies needs to be added to the [requirements.in](./requirements.in) file in the root directory.
+Please use [pip-tools](https://github.com/jazzband/pip-tools) to update pip-based packages up to date. Any additional development dependencies needs to be added to the [requirements.in](./requirements.in) file in the root directory.
 * `Please don't try to update the dependencies manually.`
 
 ## License Header

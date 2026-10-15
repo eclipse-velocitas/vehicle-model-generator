@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2025 Contributors to the Eclipse Foundation
+# Copyright (c) 2022-2026 Contributors to the Eclipse Foundation
 #
 # This program and the accompanying materials are made available under the
 # terms of the Apache License, Version 2.0 which is available at
@@ -16,11 +16,11 @@
 
 import os
 import re
-from typing import List, Set
+from typing import List, Set, cast
 
 # Until vsspec issue will be fixed: https://github.com/COVESA/vss-tools/issues/208
-from vspec.model.constants import VSSType  # type: ignore
-from vspec.model.vsstree import VSSNode  # type: ignore
+from vss_tools.model import NodeType, VSSDataDatatype, VSSDataBranch  # type: ignore
+from vss_tools.tree import VSSNode  # type: ignore
 
 from velocitas.model_generator.cpp.cpp_keywords import cpp_keywords
 from velocitas.model_generator.utils import CodeGeneratorContext, camel_to_snake_case
@@ -28,6 +28,27 @@ from velocitas.model_generator.utils import CodeGeneratorContext, camel_to_snake
 
 class VehicleModelCppGenerator:
     """Generate c++ code for vehicle model."""
+
+    _PARENT_CLASS_NAME_INIT = "ParentClass(name, parent)"
+
+    @staticmethod
+    def __as_vss_datadatatype(node: VSSNode) -> VSSDataDatatype:
+        return cast(VSSDataDatatype, node.data)
+
+    @staticmethod
+    def __as_vss_databranch(node: VSSNode) -> VSSDataBranch:
+        return cast(VSSDataBranch, node.data)
+
+    @staticmethod
+    def __get_node_type(node: VSSNode) -> NodeType:
+        node_type = getattr(node.data, "type")
+        if isinstance(node_type, NodeType):
+            return node_type
+        return NodeType(node_type)
+
+    @staticmethod
+    def __get_instances(node: VSSNode):
+        return getattr(node.data, "instances", None)
 
     def __init__(self, root_node: VSSNode, target_folder: str, root_namespace: str):
         """Initialize the c++ generator.
@@ -103,7 +124,7 @@ class VehicleModelConan(ConanFile):
                 self.root_path, *self.__to_folder_names(child_namespace_list)
             )
 
-            if child.type == VSSType.BRANCH:
+            if self.__get_node_type(child) == NodeType.BRANCH:
                 if not os.path.exists(child_path):
                     os.makedirs(child_path)
                 self.__gen_model(child, child_namespace_list)
@@ -148,7 +169,7 @@ class VehicleModelConan(ConanFile):
             f"#endif // {self.__generate_guard_name(namespace_list, node)}\n"
         )
 
-    def __gen_imports(self, node: VSSNode):
+    def __gen_imports(self):
         self.ctx_header.write('#include "sdk/DataPoint.h"\n')
         self.ctx_header.write('#include "sdk/Model.h"\n')
         self.ctx_header.write("\n")
@@ -174,29 +195,76 @@ class VehicleModelConan(ConanFile):
         self.ctx_header.write(f"/** {node.name} model. */\n")
 
     def __document_member(self, node: VSSNode):
+        node_type = self.__get_node_type(node)
         self.ctx_header.write("/**\n")
-        if node.type.value == "attribute":
-            assert node.datatype is not None
-            self.ctx_header.write(
-                f"* {node.name}: {node.type.value} ({node.datatype.value})\n"
-            )
-        else:
-            self.ctx_header.write(f"* {node.name}: {node.type.value}\n")
 
-        self.ctx_header.write(f"* {node.description}\n")
+        self.ctx_header.write(f"* {node.name}: {node_type.value}")
+        if node_type in (NodeType.ACTUATOR, NodeType.SENSOR, NodeType.ATTRIBUTE):
+            node_datatype = self.__as_vss_datadatatype(node)
+            self.ctx_header.write(f" ({node_datatype.datatype})")
+        self.ctx_header.write("\n")
+
+        description = getattr(node.data, "description", "")
+        comment = getattr(node.data, "comment", None)
+        self.ctx_header.write(f"* {description}\n")
         self.ctx_header.write("*\n")
-        if len(node.comment) > 0:
-            self.ctx_header.write(f"* {node.comment}\n")
+        if comment and len(comment) > 0:
+            self.ctx_header.write(f"* Comment: {comment}\n")
             self.ctx_header.write("*\n")
 
-        if not isinstance(node.min, str) or not isinstance(node.max, str):
-            self.ctx_header.write(f"* Value range: [{node.min}, {node.max}]\n")
-        if hasattr(node, "unit"):
-            self.ctx_header.write(f"* Unit: {node.unit}\n")
-        if len(node.allowed) > 0:
-            allowed_values = ", ".join(node.allowed)
-            self.ctx_header.write(f"* Allowed values: {allowed_values}\n")
+        min_value = getattr(node.data, "min", None)
+        max_value = getattr(node.data, "max", None)
+        if isinstance(min_value, (int, float)) or isinstance(max_value, (int, float)):
+            if not isinstance(min_value, (int, float)):
+                min_value = "-"
+            if not isinstance(max_value, (int, float)):
+                max_value = "-"
+            self.ctx_header.write(f"* Value range: [{min_value}, {max_value}]\n")
+
+        if node_type != NodeType.BRANCH:
+            unit = getattr(node.data, "unit", None)
+            if unit is not None and len(unit) > 0:
+                self.ctx_header.write(f"* Unit: {unit}\n")
+
+            allowed = getattr(node.data, "allowed", None)
+            if allowed and len(allowed) > 0:
+                allowed_values = ", ".join(map(str, allowed))
+                self.ctx_header.write(f"* Allowed values: {allowed_values}\n")
+
         self.ctx_header.write("**/\n")
+
+    def __build_named_range_members(
+        self,
+        nested_type: str,
+        nested_values: list,
+        ctor_initializer_list: list[str],
+        member_list: list[str],
+        method_list: list[str],
+    ) -> None:
+        range_name = nested_values[0]
+        min_value = nested_values[1]
+        max_value = nested_values[2]
+        for value in range(min_value, max_value + 1):
+            ctor_initializer_list.append(
+                f'{range_name}{value}("{range_name}{value}", this)'
+            )
+            member_list.append(f"{nested_type} {range_name}{value}")
+
+        method_context = CodeGeneratorContext()
+        method_context.write(f"{nested_type}& {range_name}(int index) {{\n")
+        with method_context as method_scope:
+            for value in range(min_value, max_value + 1):
+                method_scope.write(f"if (index == {value}) {{\n")
+                with method_scope as return_scope:
+                    return_scope.write(f"return {range_name}{value};\n")
+                method_scope.write("}\n")
+            method_scope.write(
+                'throw std::runtime_error("Given value is outside of allowed range '
+                f'[{min_value};{max_value}]!");\n'
+            )
+            self.external_includes.add("stdexcept")
+        method_context.write("}\n")
+        method_list.append(method_context.get_content())
 
     def __gen_nested_class(
         self,
@@ -226,8 +294,8 @@ class VehicleModelConan(ConanFile):
         ctor_params = ""
         ctor_initializer_list = []
         ctor_initializer_str = ""
-        method_list = []
-        member_list = []
+        method_list: list[str] = []
+        member_list: list[str] = []
         member_list_str = ""
         class_name = ""
 
@@ -238,11 +306,8 @@ class VehicleModelConan(ConanFile):
         elif name.startswith("NamedRange"):
             name = values[0]
             ctor_params = "std::string name, ParentClass* parent"
-            ctor_initializer_list.append("ParentClass(name, parent)")
+            ctor_initializer_list.append(self._PARENT_CLASS_NAME_INIT)
             class_name = f"{name}Type"
-
-            min_value = values[1]
-            max_value = values[2] + 1
             self.external_includes.add("stdexcept")
             self.external_includes.add("string")
 
@@ -251,30 +316,13 @@ class VehicleModelConan(ConanFile):
                 ctor_initializer_list.append(f'{value}("{value}", this)')
                 member_list.append(f"{nested_type} {value}")
         elif nested_name == "NamedRange":
-            range_name = nested_values[0]
-            min_value = nested_values[1]
-            max_value = nested_values[2]
-            for value in range(min_value, max_value + 1):
-                ctor_initializer_list.append(
-                    f'{range_name}{value}("{range_name}{value}", this)'
-                )
-                member_list.append(f"{nested_type} {range_name}{value}")
-
-            method_context = CodeGeneratorContext()
-            method_context.write(f"{nested_type}& {range_name}(int index) {{\n")
-            with method_context as method_scope:
-                for v in range(min_value, max_value + 1):
-                    method_scope.write(f"if (index == {v}) {{\n")
-                    with method_scope as return_scope:
-                        return_scope.write(f"return {range_name}{v};\n")
-                    method_scope.write("}\n")
-                method_scope.write(
-                    'throw std::runtime_error("Given value is outside of allowed range '
-                    f'[{min_value};{max_value}]!");\n'
-                )
-                self.external_includes.add("stdexcept")
-            method_context.write("}\n")
-            method_list.append(method_context.get_content())
+            self.__build_named_range_members(
+                nested_type,
+                nested_values,
+                ctor_initializer_list,
+                member_list,
+                method_list,
+            )
 
         ctor_initializer_str = ",\n".join(ctor_initializer_list)
 
@@ -311,14 +359,14 @@ class VehicleModelConan(ConanFile):
     def __gen_collection_types(self, node: VSSNode, namespace_list: List[str]) -> str:
         collection_types = []
         for child in node.children:
-            if child.type == VSSType.BRANCH:
+            if self.__get_node_type(child) == NodeType.BRANCH:
                 child_namespace_list = namespace_list + [child.name]
                 path = os.path.join(
                     *self.__to_folder_names(child_namespace_list), child.name
                 )
                 self.includes.add(path)
 
-                if child.instances:
+                if self.__get_instances(child):
                     instances = [
                         (f"{child.name}Collection", [])
                     ] + self.__gen_instances(child)
@@ -345,7 +393,7 @@ class VehicleModelConan(ConanFile):
         collection_types = self.__gen_collection_types(node, namespace_list)
 
         self.__gen_header(namespace_list, node)
-        self.__gen_imports(node)
+        self.__gen_imports()
         self.ctx_header.write(self.__generate_opening_namespace_text(namespace_list))
         # Provide an alias for the parent class to avoid name conflicts with members
         self.ctx_header.write("using ParentClass = velocitas::Model;\n\n")
@@ -366,7 +414,7 @@ class VehicleModelConan(ConanFile):
                     f"{node.name}(const std::string& name, ParentClass* parent) :\n"
                 )
                 header_public.indent()
-                header_public.write("ParentClass(name, parent)")
+                header_public.write(self._PARENT_CLASS_NAME_INIT)
                 self.external_includes.add("string")
 
             header_public.write("%MEMBER%\n")
@@ -376,20 +424,25 @@ class VehicleModelConan(ConanFile):
             # create members
             member = ""
             for child in node.children:
+                child_type = self.__get_node_type(child)
                 self.__document_member(child)
 
-                if child.type.value in ("attribute", "sensor", "actuator"):
-                    data_type = self.__get_data_type(child.datatype.value)
+                if child_type in (
+                    NodeType.ATTRIBUTE,
+                    NodeType.SENSOR,
+                    NodeType.ACTUATOR,
+                ):
+                    child_data = self.__as_vss_datadatatype(child)
                     header_public.write(
-                        f"velocitas::DataPoint{data_type} {child.name};\n\n"
+                        f"velocitas::DataPoint{self.__get_data_type(child_data.datatype)} {child.name};\n\n"
                     )
                     member += (
                         ",\n\t\t"
-                        + f'{child.name}("{child.name}", Type::{child.type.value.upper()}, this)'
+                        + f'{child.name}("{child.name}", Type::{child_type.value.upper()}, this)'
                     )
 
-                if child.type == VSSType.BRANCH:
-                    if child.instances:
+                if child_type == NodeType.BRANCH:
+                    if self.__get_instances(child):
                         header_public.write(f"{child.name}Collection {child.name};\n\n")
                         member += ",\n\t\t" + f"{child.name}(this)"
                     else:
@@ -418,8 +471,10 @@ class VehicleModelConan(ConanFile):
         self.ctx_header.reset()
 
     def __gen_instances(self, node: VSSNode) -> list[tuple[str, list]]:
-        assert node.instances is not None
-        instances = node.instances
+        node_data = self.__as_vss_databranch(node)
+
+        assert node_data.instances is not None
+        instances = node_data.instances
 
         reg_ex = r"\w+\[\d+,(\d+)\]"
 

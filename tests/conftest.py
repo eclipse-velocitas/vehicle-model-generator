@@ -1,4 +1,4 @@
-# Copyright (c) 2024-2025 Contributors to the Eclipse Foundation
+# Copyright (c) 2024-2026 Contributors to the Eclipse Foundation
 #
 # This program and the accompanying materials are made available under the
 # terms of the Apache License, Version 2.0 which is available at
@@ -19,7 +19,7 @@ from pathlib import Path
 from velocitas_lib import download_file
 
 
-def prepare_vss_repo_data(tag: str) -> None:
+def prepare_vss_repo_data(tag: str, json_path: str) -> None:
     os.makedirs(f"{Path(__file__).parent}/data", exist_ok=True)
     test_data_path = Path(__file__).parent.joinpath("data", "vspec").__str__()
     test_data_json_path = Path(__file__).parent.joinpath("data", "json").__str__()
@@ -44,13 +44,18 @@ def prepare_vss_repo_data(tag: str) -> None:
     ):
         os.makedirs(test_data_json_path, exist_ok=True)
         download_file(
-            f"https://github.com/COVESA/vehicle_signal_specification/releases/download/{tag}/vss_rel_{tag_short}.json",
+            f"https://github.com/COVESA/vehicle_signal_specification/releases/download/{json_path}",
             f"{test_data_json_path}/vss_rel_{tag_short}.json",
         )
 
 
 def pytest_configure(config) -> None:
-    prepare_vss_repo_data("v3.0")
-    prepare_vss_repo_data("v3.1")
-    prepare_vss_repo_data("v3.1.1")
-    prepare_vss_repo_data("v4.0")
+    prepare_vss_repo_data("v3.0", "v3.0/vss_rel_3.0.json")
+    prepare_vss_repo_data("v3.1", "v3.1/vss_rel_3.1.json")
+    prepare_vss_repo_data("v3.1.1", "v3.1.1/vss_rel_3.1.1.json")
+    prepare_vss_repo_data("v4.0", "v4.0/vss_rel_4.0.json")
+    prepare_vss_repo_data("v4.1", "v4.1/vss_rel_4.1.json")
+    prepare_vss_repo_data("v4.2", "v4.2/vss_rel_4.2.json")
+    prepare_vss_repo_data("v5.0", "v5.0/vss.json")
+    prepare_vss_repo_data("v5.1", "v5.1/vss.json")
+    prepare_vss_repo_data("v6.0", "v6.0/vss.json")

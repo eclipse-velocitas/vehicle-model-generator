@@ -136,6 +136,10 @@ units:
     label: UNIX Timestamp
     description: Unix time is a system for describing a point in time. It is the number of seconds that have elapsed since the Unix epoch, excluding leap seconds.
     domain: point in time
+  iso8601:
+    label: ISO 8601 Date
+    definition: Date and Time expressed as a string according to ISO 8601
+    domain: point in time
   mbar:
     label: millibar
     description: Pressure measured in millibars

@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2025 Contributors to the Eclipse Foundation
+# Copyright (c) 2022-2026 Contributors to the Eclipse Foundation
 #
 # This program and the accompanying materials are made available under the
 # terms of the Apache License, Version 2.0 which is available at
@@ -15,11 +15,11 @@
 """VehicleModelPythonGenerator."""
 
 import os
-from typing import List, Set
+from typing import List, Set, cast
 
 # Until vsspec issue will be fixed: https://github.com/COVESA/vss-tools/issues/208
-from vspec.model.constants import VSSType  # type: ignore
-from vspec.model.vsstree import VSSNode  # type: ignore
+from vss_tools.model import NodeType, VSSDataDatatype  # type: ignore
+from vss_tools.tree import VSSNode  # type: ignore
 
 from velocitas.model_generator.python.vss_collection import VssCollection
 from velocitas.model_generator.utils import CodeGeneratorContext
@@ -27,6 +27,21 @@ from velocitas.model_generator.utils import CodeGeneratorContext
 
 class VehicleModelPythonGenerator:
     """Generate python code for vehicle model."""
+
+    @staticmethod
+    def __as_vss_datadatatype(node: VSSNode) -> VSSDataDatatype:
+        return cast(VSSDataDatatype, node.data)
+
+    @staticmethod
+    def __get_node_type(node: VSSNode) -> NodeType:
+        node_type = getattr(node.data, "type")
+        if isinstance(node_type, NodeType):
+            return node_type
+        return NodeType(node_type)
+
+    @staticmethod
+    def __get_instances(node: VSSNode):
+        return getattr(node.data, "instances", None)
 
     def __init__(self, root_node: VSSNode, target_folder: str, root_package: str):
         """Initialize the python generator.
@@ -84,7 +99,7 @@ class VehicleModelPythonGenerator:
             child_package_list = parent_package_list + [child.name]
             child_path = os.path.join(self.root_path, *child_package_list)
 
-            if child.type.value == VSSType.BRANCH.value:
+            if self.__get_node_type(child) == NodeType.BRANCH:
                 if not os.path.exists(child_path):
                     os.makedirs(child_path)
                 self.__gen_model(child, child_package_list)
@@ -130,32 +145,53 @@ class VehicleModelPythonGenerator:
 
         self.collections.clear()
 
+    def __write_docstring_member(self, node: VSSNode):
+        node_type = self.__get_node_type(node)
+        self.ctx.write(f"{node.name}: {node_type.value}")
+        if node_type in (NodeType.ACTUATOR, NodeType.SENSOR, NodeType.ATTRIBUTE):
+            node_datatype = self.__as_vss_datadatatype(node)
+            self.ctx.write(f" ({node_datatype.datatype})")
+        self.ctx.write("\n")
+
+        description = getattr(node.data, "description", "")
+        comment = getattr(node.data, "comment", None)
+        min_value = getattr(node.data, "min", None)
+        max_value = getattr(node.data, "max", None)
+        unit = getattr(node.data, "unit", None)
+        allowed = getattr(node.data, "allowed", None)
+
+        self.ctx.indent()
+        self.ctx.write(f"{description}\n")
+        self.ctx.write("\n")
+
+        if comment and len(comment) > 0:
+            self.ctx.write(f"{comment}\n")
+            self.ctx.write("\n")
+
+        if isinstance(min_value, (int, float)) or isinstance(max_value, (int, float)):
+            if not isinstance(min_value, (int, float)):
+                min_value = "-"
+            if not isinstance(max_value, (int, float)):
+                max_value = "-"
+            self.ctx.write(f"Range: [{min_value}, {max_value}]\n")
+
+        if unit:
+            self.ctx.write(f"Unit: {unit}\n")
+
+        if allowed and len(allowed) > 0:
+            allowed_values = ", ".join(map(str, allowed))
+            self.ctx.write(f"Allowed values: {allowed_values}\n")
+
+        self.ctx.write("\n")
+        self.ctx.dedent()
+
     def __gen_model_docstring(self, node: VSSNode):
         self.ctx.write(f'"""{node.name} model.')
         if node.children:
             self.ctx.write("\n\nAttributes\n")
             self.ctx.write("----------\n")
             for i in node.children:
-                if i.type.value == VSSType.ATTRIBUTE.value:
-                    self.ctx.write(f"{i.name}: {i.type.value} ({i.datatype.value})\n")
-                else:
-                    self.ctx.write(f"{i.name}: {i.type.value}\n")
-
-                self.ctx.indent()
-                self.ctx.write(f"{i.description}\n")
-                self.ctx.write("\n")
-                if len(i.comment) > 0:
-                    self.ctx.write(f"{i.comment}\n")
-                    self.ctx.write("\n")
-
-                if not isinstance(i.min, str) or not isinstance(i.max, str):
-                    self.ctx.write(f"Value range: [{i.min}, {i.max}]\n")
-                if hasattr(i, "unit"):
-                    self.ctx.write(f"Unit: {i.unit}\n")
-                if len(i.allowed) > 0:
-                    allowed_values = ", ".join(i.allowed)
-                    self.ctx.write(f"Allowed values: {allowed_values}\n")
-                self.ctx.dedent()
+                self.__write_docstring_member(i)
         self.ctx.write('"""\n\n')
 
     def __gen_model(self, node: VSSNode, package_list: List[str], is_root=False):
@@ -181,10 +217,11 @@ class VehicleModelPythonGenerator:
             self.ctx.write("\n")
 
         for child in node.children:
+            child_type = self.__get_node_type(child)
             # Check if branch, add class members
-            if child.type.value == VSSType.BRANCH.value:
+            if child_type == NodeType.BRANCH:
                 # if has instances, a collection will be created
-                if child.instances:
+                if self.__get_instances(child):
                     collection = VssCollection(child)
                     self.collections.append(collection)
                     self.ctx.write(
@@ -197,18 +234,19 @@ class VehicleModelPythonGenerator:
                     )
                 self.imports.add(".".join(package_list + [child.name]))
             # else (ATTRIBUTE, SENSOR, ACTUATOR)
-            elif child.type.value in (
-                VSSType.ATTRIBUTE.value,
-                VSSType.SENSOR.value,
-                VSSType.ACTUATOR.value,
+            elif child_type in (
+                NodeType.ATTRIBUTE,
+                NodeType.SENSOR,
+                NodeType.ACTUATOR,
             ):
+                child_datatype = self.__as_vss_datadatatype(child)
                 self.ctx.write(
                     f"self.{child.name} = "
-                    f"DataPoint{self.__get_datatype(child.datatype.value)}"
+                    f"DataPoint{self.__get_datatype(child_datatype.datatype)}"
                     f'("{child.name}", self)\n'
                 )
                 self.model_imports.add(
-                    f"DataPoint{self.__get_datatype(child.datatype.value)}"
+                    f"DataPoint{self.__get_datatype(child_datatype.datatype)}"
                 )
 
         self.ctx.dedent()

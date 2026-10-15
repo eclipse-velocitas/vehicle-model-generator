@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (c) 2022-2025 Contributors to the Eclipse Foundation
+# Copyright (c) 2022-2026 Contributors to the Eclipse Foundation
 #
 # This program and the accompanying materials are made available under the
 # terms of the Apache License, Version 2.0 which is available at
@@ -18,8 +18,6 @@
 
 import argparse
 
-import vspec  # type: ignore
-
 from velocitas.model_generator import generate_model
 
 
@@ -32,7 +30,7 @@ def main():
     # Add para to name package
     parser.add_argument(
         "-N",
-        "--name",
+        "--package-name",
         type=str,
         default="vehicle",
         help="When generating a python model this is used as name of the module/package.\
@@ -87,12 +85,20 @@ def main():
         help="The file locations of units files as comma separated list.",
     )
     parser.add_argument(
+        "-q",
+        "--quantities",
+        nargs="+",
+        type=str,
+        default=[],
+        help="The file locations of quantities files as comma separated list.",
+    )
+    parser.add_argument(
         "-e",
         "--extended-attributes",
         type=str,
         default="",
         help="Whitelisted extended attributes as comma separated list. Note, that "
-        "extended attributes aren't considered by the generator. This paramter is "
+        "extended attributes aren't considered by the generator. This parameter is "
         "only for suppressing warnings/errors.",
     )
     parser.add_argument(
@@ -104,18 +110,14 @@ def main():
     args = parser.parse_args()
 
     ext_attributes_list = args.extended_attributes.split(",")
-    if len(ext_attributes_list) > 0:
-        vspec.model.vsstree.VSSNode.whitelisted_extended_attributes = (
-            ext_attributes_list
-        )
-        print(f"Known extended attributes: {', '.join(ext_attributes_list)}")
 
     generate_model(
         args.input_file_path,
         args.units,
+        args.quantities,
         args.language,
         args.target_folder,
-        args.name,
+        args.package_name,
         args.strict,
         args.include_dir,
         ext_attributes_list,
