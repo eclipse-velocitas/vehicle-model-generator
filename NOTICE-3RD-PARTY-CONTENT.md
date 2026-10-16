@@ -36,7 +36,7 @@
 |pygments|2.21.0|unknown|
 |pyparsing|3.3.3|unknown|
 |python-dateutil|2.9.0.post0|Apache 2.0<br/>BSD|
-|python-discovery|1.6.2|MIT|
+|python-discovery|1.6.3|MIT|
 |pytz|2026.5|MIT|
 |pyyaml|6.0.3|MIT|
 |rdflib|7.6.0|New BSD|
@@ -49,7 +49,7 @@
 |typing-extensions|4.16.0|unknown|
 |typing-inspection|0.4.4|unknown|
 |tzdata|2026.5|Apache 2.0|
-|virtualenv|21.14.7|MIT|
+|virtualenv|21.14.8|MIT|
 |vss-tools|6.0.0|Mozilla Public License 2.0|
 ## Workflows
 | Dependency | Version | License |
