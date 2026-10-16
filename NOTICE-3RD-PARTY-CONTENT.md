@@ -56,6 +56,7 @@
 |:-----------|:-------:|--------:|
 |actions/checkout|v4|MIT License|
 |actions/download-artifact|v4|MIT License|
+|actions/setup-node|v4|MIT License|
 |actions/setup-python|v5|MIT License|
 |actions/upload-artifact|v4|MIT License|
 |irongut/CodeCoverageSummary|v1.3.0|MIT License|
