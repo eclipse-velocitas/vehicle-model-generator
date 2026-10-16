@@ -13,12 +13,17 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import compileall
+import shutil
 import subprocess
 import sys
 from pathlib import Path
 
 import pytest
 from velocitas.model_generator import generate_model
+from tests.typescript_sdk import (
+    install_local_typescript_sdk,
+    require_typescript_sdk_path,
+)
 
 test_data_base_path = Path(__file__).parent.joinpath("data")
 
@@ -34,7 +39,7 @@ def get_unit_file_paths(input_file_path: str, include_dir: str) -> list[str]:
     return [test_data_base_path.joinpath("units.yaml").__str__()]
 
 
-@pytest.mark.parametrize("language", ["python", "cpp"])
+@pytest.mark.parametrize("language", ["python", "cpp", "typescript"])
 @pytest.mark.parametrize(
     "input_file_path,include_dir,out_dir",
     [
@@ -47,13 +52,19 @@ def get_unit_file_paths(input_file_path: str, include_dir: str) -> list[str]:
         ("json/vss_rel_5.0.json", ".", "output/json/vss5.0"),
         ("json/vss_rel_5.1.json", ".", "output/json/vss5.1"),
         ("json/vss_rel_6.0.json", ".", "output/json/vss6.0"),
-        # because of typo in the specifications 3.0, 3.1, 3.11, 4.0, 4,1, 4.2 and 5.1 are not supported
+        ("json/vss_rel_6.1.json", ".", "output/json/vss6.1"),
+        # because of typo in the specifications 3.0, 3.1, 3.1.1, 4.0, 4,1, 4.2 and 5.1 are not supported
         # ("vspec/v3.0/spec/VehicleSignalSpecification.vspec", "vspec/v3.0/spec", "output/vspec/v3.0"),
         # ("vspec/v3.1/spec/VehicleSignalSpecification.vspec", "vspec/v3.1/spec", "output/vspec/v3.1"),
         # ("vspec/v3.1.1/spec/VehicleSignalSpecification.vspec", "vspec/v3.1.1/spec", "output/vspec/v3.1.1"),
         # ("vspec/v4.0/spec/VehicleSignalSpecification.vspec","vspec/v4.0/spec","output/vspec/v4.0",),
         # ("vspec/v4.1/spec/VehicleSignalSpecification.vspec", "vspec/v4.1/spec", "output/vspec/v4.1"),
-        #  ("vspec/v4.2/spec/VehicleSignalSpecification.vspec", "vspec/v4.2/spec", "output/vspec/v4.2"),
+        # ("vspec/v4.2/spec/VehicleSignalSpecification.vspec", "vspec/v4.2/spec", "output/vspec/v4.2"),
+        (
+            "vspec/v4.2.1/spec/VehicleSignalSpecification.vspec",
+            "vspec/v4.2.1/spec",
+            "output/vspec/v4.2.1",
+        ),
         (
             "vspec/v5.0/spec/VehicleSignalSpecification.vspec",
             "vspec/v5.0/spec",
@@ -64,6 +75,11 @@ def get_unit_file_paths(input_file_path: str, include_dir: str) -> list[str]:
             "vspec/v6.0/spec/VehicleSignalSpecification.vspec",
             "vspec/v6.0/spec",
             "output/vspec/v6.0",
+        ),
+        (
+            "vspec/v6.1/spec/VehicleSignalSpecification.vspec",
+            "vspec/v6.1/spec",
+            "output/vspec/v6.1",
         ),
     ],
 )
@@ -82,7 +98,8 @@ def test_generate(
         language,
         output_path,
         "vehicle",
-        include_dir=[include_dir],
+        include_dir=[str(test_data_base_path.joinpath(include_dir))],
+        ext_attributes_list=["enum"],
     )
 
     if language == "python":
@@ -90,3 +107,9 @@ def test_generate(
         assert compileall.compile_dir(output_path, force=True)
     elif language == "cpp":
         subprocess.check_call(["conan", "export", output_path])
+    elif language == "typescript":
+        if shutil.which("node") is None or shutil.which("npm") is None:
+            pytest.skip("Node.js or npm is not installed")
+        sdk_path = require_typescript_sdk_path()
+        install_local_typescript_sdk(Path(output_path), sdk_path)
+        subprocess.check_call(["npx", "tsc", "--noEmit"], cwd=output_path)

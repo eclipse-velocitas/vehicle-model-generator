@@ -1,0 +1,5 @@
+$LICENSE_HEADER
+
+export type * from "./types.js";
+export * from "./$PACKAGE_REL_PATH/$ROOT_NAME.js";
+export * from "./$PACKAGE_REL_PATH/${ROOT_NAME}Factory.js";

@@ -26,6 +26,10 @@ from velocitas.model_generator.cpp.cpp_generator import VehicleModelCppGenerator
 from velocitas.model_generator.python.python_generator import (
     VehicleModelPythonGenerator,
 )
+from velocitas.model_generator.typescript.typescript_generator import (
+    UnsupportedDatatypeError,
+    VehicleModelTypescriptGenerator,
+)
 from velocitas.model_generator.tree_generator.file_import import (
     FileImport,
     UnsupportedFileFormat,
@@ -88,9 +92,20 @@ def generate_model(
                 name,
             ).generate()
             print("All done.")
+        elif language == "typescript":
+            print("Recursing tree and creating TypeScript code...")
+            VehicleModelTypescriptGenerator(
+                tree,
+                target_folder,
+                name,
+            ).generate()
+            print("All done.")
         else:
             print(f"Language {language} is not supported yet.")
     except vss_tools.vspec.InvalidSpecException as e:
+        print(f"Error: {e}")
+        sys.exit(255)
+    except UnsupportedDatatypeError as e:
         print(f"Error: {e}")
         sys.exit(255)
     except UnsupportedFileFormat as e:
