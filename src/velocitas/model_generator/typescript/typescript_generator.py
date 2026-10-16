@@ -129,7 +129,7 @@ class VehicleModelTypescriptGenerator:
     @classmethod
     @cache
     def _get_license_header(cls) -> str:
-        license_path = os.path.join(cls._get_templates_folder(), "LICENSE_HEADER.txt")
+        license_path = os.path.join(cls._get_templates_folder(), "header.ts.template")
         with open(license_path, "r", encoding="utf-8") as f:
             return f.read().strip()
 
