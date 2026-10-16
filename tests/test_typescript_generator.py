@@ -166,7 +166,9 @@ def test_typescript_generator_basic():
         assert os.path.isfile(os.path.join(temp_dir, "src", "index.ts"))
         assert not os.path.exists(os.path.join(temp_dir, "src", "sdk"))
         assert os.path.isfile(os.path.join(temp_dir, "src", "vehicle", "Vehicle.ts"))
-        assert os.path.isfile(os.path.join(temp_dir, "src", "vehicle", "VehicleFactory.ts"))
+        assert os.path.isfile(
+            os.path.join(temp_dir, "src", "vehicle", "VehicleFactory.ts")
+        )
 
         index_ts = open(os.path.join(temp_dir, "src", "index.ts")).read()
         assert 'export type * from "./types.js";' in index_ts
@@ -182,18 +184,20 @@ def test_typescript_generator_basic():
         assert 'this.Speed = new Sensor("Speed", this);' in vehicle_ts
         assert "createVehicle" not in vehicle_ts
         assert "VehicleFactory" not in vehicle_ts
-        assert (
-            'import {' in vehicle_ts
-            and '"vehicle-app-ts-sdk"' in vehicle_ts
-        )
+        assert "import {" in vehicle_ts and '"vehicle-app-ts-sdk"' in vehicle_ts
         package_json = open(os.path.join(temp_dir, "package.json")).read()
         assert '"vehicle-app-ts-sdk": "^0.1.0"' in package_json
 
-        factory_ts = open(os.path.join(temp_dir, "src", "vehicle", "VehicleFactory.ts")).read()
+        factory_ts = open(
+            os.path.join(temp_dir, "src", "vehicle", "VehicleFactory.ts")
+        ).read()
         assert "type ModelFactory," in factory_ts
         assert "type VehicleDataBrokerClient," in factory_ts
         assert 'import { Vehicle } from "./Vehicle.js";' in factory_ts
-        assert "export class VehicleFactory implements ModelFactory<Vehicle> {" in factory_ts
+        assert (
+            "export class VehicleFactory implements ModelFactory<Vehicle> {"
+            in factory_ts
+        )
         assert "create(client?: VehicleDataBrokerClient): Vehicle {" in factory_ts
         assert "return new Vehicle(client);" in factory_ts
     finally:
@@ -226,10 +230,15 @@ def test_typescript_model_branch_name_no_collision():
         generator = VehicleModelTypescriptGenerator(root_node, temp_dir, "vehicle")
         generator.generate()
 
-        model_ts = open(os.path.join(temp_dir, "src", "vehicle", "Model", "Model.ts")).read()
+        model_ts = open(
+            os.path.join(temp_dir, "src", "vehicle", "Model", "Model.ts")
+        ).read()
         assert "Branch," in model_ts
         assert "export class Model extends Branch" in model_ts
-        assert "constructor(name: string, parent?: Node, client?: VehicleDataBrokerClient) {" in model_ts
+        assert (
+            "constructor(name: string, parent?: Node, client?: VehicleDataBrokerClient) {"
+            in model_ts
+        )
         assert "super(name, parent, client);" in model_ts
     finally:
         shutil.rmtree(temp_dir)
@@ -274,12 +283,17 @@ def test_typescript_same_name_child_branch():
         assert 'this.Body = new Body("Body", this);' in vehicle_ts
         assert "Vehicle_Body" not in vehicle_ts
 
-        body_ts = open(os.path.join(temp_dir, "src", "vehicle", "Body", "Body.ts")).read()
+        body_ts = open(
+            os.path.join(temp_dir, "src", "vehicle", "Body", "Body.ts")
+        ).read()
         assert "import { Body as Body_Body } from" in body_ts
         assert "public readonly Body: Body_Body;" in body_ts
         assert 'this.Body = new Body_Body("Body", this);' in body_ts
         assert "export class Body extends Branch" in body_ts
-        assert "constructor(name: string, parent?: Node, client?: VehicleDataBrokerClient) {" in body_ts
+        assert (
+            "constructor(name: string, parent?: Node, client?: VehicleDataBrokerClient) {"
+            in body_ts
+        )
         assert "super(name, parent, client);" in body_ts
     finally:
         shutil.rmtree(temp_dir)
@@ -416,7 +430,7 @@ def test_typescript_types_generation():
         assert os.path.isfile(types_ts_path)
         types_content = open(types_ts_path).read()
         assert 'export type { Body } from "./vehicle/Body/Body.js";' in types_content
-        assert 'export type { Vehicle }' not in types_content
+        assert "export type { Vehicle }" not in types_content
     finally:
         shutil.rmtree(temp_dir)
 
@@ -494,7 +508,9 @@ def test_typescript_tsc_and_node_smoke():
             capture_output=True,
             text=True,
         )
-        assert res_typecheck.returncode == 0, res_typecheck.stdout + res_typecheck.stderr
+        assert res_typecheck.returncode == 0, (
+            res_typecheck.stdout + res_typecheck.stderr
+        )
 
         res_build = subprocess.run(
             ["npx", "tsc", "--project", temp_dir],

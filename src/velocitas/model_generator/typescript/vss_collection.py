@@ -92,7 +92,9 @@ class VssCollection:
 
         # Generate inner type class first if multi-level
         if has_inner_types and inner_instances:
-            self._gen_inner_type_class(self.element_type, inner_type_name, inner_instances)
+            self._gen_inner_type_class(
+                self.element_type, inner_type_name, inner_instances
+            )
 
         # Generate main collection class
         instance_type = inner_type_name if has_inner_types else self.element_type
@@ -116,9 +118,7 @@ class VssCollection:
         self.ctx.write(f'super("{node.name}", parent, client);\n\n')
         for inst in instance_list:
             prop_name = sanitize_ts_identifier(inst)
-            self.ctx.write(
-                f'this.{prop_name} = new {instance_type}("{inst}", this);\n'
-            )
+            self.ctx.write(f'this.{prop_name} = new {instance_type}("{inst}", this);\n')
         elements_init = ", ".join(
             f"this.{sanitize_ts_identifier(inst)}" for inst in instance_list
         )
@@ -166,9 +166,7 @@ class VssCollection:
             )
         elif len(inner_instances.content) > 0:
             self.ctx.write("\n")
-            self._gen_getter(
-                _DEFAULT_RANGE_NAME, inner_instances.content, element_type
-            )
+            self._gen_getter(_DEFAULT_RANGE_NAME, inner_instances.content, element_type)
 
         self.ctx.dedent()
         self.ctx.write("}\n\n")
@@ -206,9 +204,7 @@ class VssCollection:
         if isinstance(instance, str):
             if re.match(reg_ex, instance):
                 parts = [
-                    p.strip()
-                    for p in re.split(r"\[+|,+|\]+", instance)
-                    if p.strip()
+                    p.strip() for p in re.split(r"\[+|,+|\]+", instance) if p.strip()
                 ]
                 range_name = parts[0]
                 lower_bound = int(parts[1])

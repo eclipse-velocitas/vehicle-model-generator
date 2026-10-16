@@ -19,10 +19,10 @@ import shutil
 from dataclasses import dataclass
 from functools import cache
 from string import Template
-from typing import List, Optional, Set, Tuple, cast
+from typing import List, Optional, Set, Tuple
 
-from vss_tools.model import NodeType, VSSDataDatatype  # type: ignore
-from vss_tools.tree import VSSNode  # type: ignore
+from vss_tools.model import NodeType
+from vss_tools.tree import VSSNode
 
 from velocitas.model_generator.typescript.typescript_keywords import (
     sanitize_ts_identifier,
@@ -175,7 +175,10 @@ class VehicleModelTypescriptGenerator:
         )
 
         with open(
-            os.path.join(self.src_folder, "index.ts"), "w", encoding="utf-8", newline="\n"
+            os.path.join(self.src_folder, "index.ts"),
+            "w",
+            encoding="utf-8",
+            newline="\n",
         ) as f:
             f.write(index_content)
 
@@ -340,7 +343,7 @@ class VehicleModelTypescriptGenerator:
                     prop_name=prop_name,
                     vss_name=vss_name,
                     decl_type=collection.name,
-                    ctor_call=f'new {collection.name}(this)',
+                    ctor_call=f"new {collection.name}(this)",
                     doc_node=child,
                     branch_import=(child.name, branch_alias),
                     collection=collection,
@@ -364,9 +367,7 @@ class VehicleModelTypescriptGenerator:
             sdk_imports=sdk_imports,
         )
 
-    def _gen_model(
-        self, node: VSSNode, package_list: List[str], is_root: bool = False
-    ):
+    def _gen_model(self, node: VSSNode, package_list: List[str], is_root: bool = False):
         self._check_case_collisions(node)
         self.ctx.reset()
         self.branch_imports.clear()
@@ -398,9 +399,7 @@ class VehicleModelTypescriptGenerator:
 
         # Constructor
         if is_root:
-            self.ctx.write(
-                "constructor(client?: VehicleDataBrokerClient) {\n"
-            )
+            self.ctx.write("constructor(client?: VehicleDataBrokerClient) {\n")
             self.ctx.indent()
             self.ctx.write(f'super("{node.name}", undefined, client);\n\n')
         else:
@@ -430,12 +429,18 @@ class VehicleModelTypescriptGenerator:
         rel_file_path = "./" + "/".join(package_list) + f"/{node.name}.js"
         pkg_tuple = tuple(package_list)
         if not is_root:
-            self.type_exports.add(_TypeExport(node.name, pkg_tuple, rel_file_path, False))
+            self.type_exports.add(
+                _TypeExport(node.name, pkg_tuple, rel_file_path, False)
+            )
         for collection in self.collections:
-            self.type_exports.add(_TypeExport(collection.name, pkg_tuple, rel_file_path, True))
+            self.type_exports.add(
+                _TypeExport(collection.name, pkg_tuple, rel_file_path, True)
+            )
             if getattr(collection, "has_inner_types", False):
                 self.type_exports.add(
-                    _TypeExport(collection.inner_type_name, pkg_tuple, rel_file_path, True)
+                    _TypeExport(
+                        collection.inner_type_name, pkg_tuple, rel_file_path, True
+                    )
                 )
 
         # Write to file: src/<package_list>/<node.name>.ts
@@ -447,7 +452,9 @@ class VehicleModelTypescriptGenerator:
 
     def _gen_factory(self):
         """Generate factory class for the root model in a separate file."""
-        template_path = os.path.join(self._get_templates_folder(), "factory.ts.template")
+        template_path = os.path.join(
+            self._get_templates_folder(), "factory.ts.template"
+        )
         with open(template_path, "r", encoding="utf-8") as f:
             template = Template(f.read())
 
@@ -476,7 +483,11 @@ class VehicleModelTypescriptGenerator:
             if name_counts[item.raw_name] == 1:
                 export_entries.append((item.raw_name, item.raw_name, item.rel_path))
             else:
-                path_segments = item.package_list[1:] if len(item.package_list) > 1 else item.package_list
+                path_segments = (
+                    item.package_list[1:]
+                    if len(item.package_list) > 1
+                    else item.package_list
+                )
                 qualified = "".join(path_segments)
                 if item.is_collection:
                     qualified = f"{qualified}{item.raw_name}"
@@ -486,7 +497,9 @@ class VehicleModelTypescriptGenerator:
             if export_name == raw_name:
                 lines.append(f'export type {{ {raw_name} }} from "{rel_path}";')
             else:
-                lines.append(f'export type {{ {raw_name} as {export_name} }} from "{rel_path}";')
+                lines.append(
+                    f'export type {{ {raw_name} as {export_name} }} from "{rel_path}";'
+                )
 
         lines.append("\n")
         with open(
@@ -517,7 +530,9 @@ class VehicleModelTypescriptGenerator:
             if b_name == alias:
                 lines.append(f'import {{ {b_name} }} from "./{b_name}/{b_name}.js";')
             else:
-                lines.append(f'import {{ {b_name} as {alias} }} from "./{b_name}/{b_name}.js";')
+                lines.append(
+                    f'import {{ {b_name} as {alias} }} from "./{b_name}/{b_name}.js";'
+                )
 
         lines.append("\n")
         return "\n".join(lines)
