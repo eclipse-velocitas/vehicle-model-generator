@@ -13,6 +13,8 @@ dependencies = { file = ["requirements.txt"] }
 
 [tool.setuptools.package-data]
 "velocitas.model_generator.typescript" = ["templates/*"]
+"velocitas.model_generator.cpp" = ["templates/*"]
+"velocitas.model_generator.python" = ["templates/*"]
 
 
 [build-system]

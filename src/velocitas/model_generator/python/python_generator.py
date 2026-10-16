@@ -55,12 +55,21 @@ class VehicleModelPythonGenerator:
         self.imports: Set[str] = set()
         self.model_imports: Set[str] = set()
         self.collections: List[VssCollection] = []
+        self.file_header = self.__get_file_header()
         if "." in root_package:
             self.root_package_list = root_package.split(".")
         elif "/" in root_package:
             self.root_package_list = root_package.split("/")
         else:
             self.root_package_list = [root_package]
+
+    @staticmethod
+    def __get_file_header() -> str:
+        template_path = os.path.join(
+            os.path.dirname(__file__), "templates", "header.py.template"
+        )
+        with open(template_path, "r", encoding="utf-8") as template:
+            return template.read().strip()
 
     def generate(self):
         """Generate python code for vehicle model."""
@@ -91,7 +100,7 @@ class VehicleModelPythonGenerator:
 
         path = os.path.join(self.target_folder, "setup.py")
         with open(path, "w", encoding="utf-8") as file:
-            file.write(self.ctx.get_content())
+            file.write(f"{self.file_header}\n\n{self.ctx.get_content()}")
 
     def __visit_nodes(self, node: VSSNode, parent_package_list: List[str]):
         """Recursively render nodes."""
@@ -106,14 +115,10 @@ class VehicleModelPythonGenerator:
                 self.__visit_nodes(child, child_package_list)
 
     def __gen_header(self, node: VSSNode):
-        self.ctx.write(
-            f"""#!/usr/bin/env python3
-
-        ""\"{node.name} model.""\"
-
-        # pylint: disable=C0103,R0801,R0902,R0915,C0301,W0235\n\n\n""",
-            strip_lines=True,
-        )
+        self.ctx.write("#!/usr/bin/env python3\n")
+        self.ctx.write(f"{self.file_header}\n\n")
+        self.ctx.write(f'"""{node.name} model."""\n\n')
+        self.ctx.write("# pylint: disable=C0103,R0801,R0902,R0915,C0301,W0235\n\n\n")
 
     def __gen_imports(self):
         self.model_imports.add("Model")

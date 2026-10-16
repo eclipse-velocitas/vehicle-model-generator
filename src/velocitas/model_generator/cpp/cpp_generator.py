@@ -64,6 +64,19 @@ class VehicleModelCppGenerator:
         self.includes: Set[str] = set()
         self.external_includes: Set[str] = set()
         self.root_namespace_list = self.__split_into_namespace_list(root_namespace)
+        self.file_header = self.__get_template_header("cpp", "header.cpp.template")
+
+    @staticmethod
+    def __get_template_header(language: str, template_name: str) -> str:
+        template_path = os.path.join(
+            os.path.dirname(__file__),
+            "..",
+            language,
+            "templates",
+            template_name,
+        )
+        with open(template_path, "r", encoding="utf-8") as template:
+            return template.read().strip()
 
     def __split_into_namespace_list(self, namespace: str) -> List[str]:
         if "::" in namespace:
@@ -466,7 +479,10 @@ class VehicleModelConan(ConanFile):
             "w",
             encoding="utf-8",
         ) as file:
-            file.write(self.ctx_header.get_content().replace("%MEMBER%", member))
+            file.write(
+                f"{self.file_header}\n\n"
+                + self.ctx_header.get_content().replace("%MEMBER%", member)
+            )
 
         self.ctx_header.reset()
 
